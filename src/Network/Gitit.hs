@@ -93,7 +93,7 @@ module Network.Gitit (
                      , module Network.Gitit.Initialize
                      -- * Configuration
                      , module Network.Gitit.Config
-                     , loginUserForm
+--                      , loginUserForm
                      -- * Types
                      , module Network.Gitit.Types
                      -- * Tools for building handlers
@@ -102,7 +102,7 @@ module Network.Gitit (
                      , module Network.Gitit.ContentTransformer
                      , module Network.Gitit.Page
                      , getFileStore
-                     , getUser
+--                      , getUser
                      , getConfig
                      , queryGititState
                      , updateGititState
@@ -116,11 +116,10 @@ import Network.Gitit.Initialize
 import Network.Gitit.Config
 import Network.Gitit.Layout
 import Network.Gitit.State
-        (getFileStore, getUser, getConfig, queryGititState, updateGititState)
+        (getFileStore, getConfig, queryGititState, updateGititState) -- getUser,
 import Network.Gitit.ContentTransformer
 import Network.Gitit.Page
-import Network.Gitit.Authentication (loginUserForm)
-import Paths_gitit (getDataFileName)
+-- import Network.Gitit.Authentication (loginUserForm)
 import Control.Monad.Reader
 import Prelude hiding (readFile)
 import qualified Data.ByteString.Char8 as B
@@ -135,20 +134,20 @@ wiki conf = do
   let maxSize = fromIntegral $ maxUploadSize conf
   decodeBody $ defaultBodyPolicy tempDir maxSize maxSize maxSize
   let static = staticDir conf
-  defaultStatic <- liftIO $ getDataFileName $ "data" </> "static"
+  let defaultStatic = "/usr/share/gitit/data" </> "static"
   -- if file not found in staticDir, we check also in the data/static
   -- directory, which contains defaults
   let staticHandler = withExpiresHeaders $
         serveDirectory' static `mplus` serveDirectory' defaultStatic
   let debugHandler' = msum [debugHandler | debugMode conf]
-  let handlers = debugHandler' `mplus` authHandler conf `mplus`
-                 authenticate ForRead (msum wikiHandlers)
+  let handlers = debugHandler' `mplus` (msum wikiHandlers) -- authHandler conf `mplus`
+--                  authenticate ForRead (msum wikiHandlers)
   let fs = filestoreFromConfig conf
   let ws = WikiState { wikiConfig = conf, wikiFileStore = fs }
   if compressResponses conf
      then compressedResponseFilter
      else return ""
-  staticHandler `mplus` runHandler ws (withUser conf handlers)
+  staticHandler `mplus` runHandler ws handlers -- (withUser conf handlers)
 
 -- | Like 'serveDirectory', but if file is not found, fail instead of
 -- returning a 404 error.
@@ -169,17 +168,18 @@ wikiHandlers =
   [ -- redirect /wiki -> /wiki/ when gitit is being served at /wiki
     -- so that relative wikilinks on the page will work properly:
     guardBareBase >> getWikiBase >>= \b -> movedPermanently (b ++ "/") (toResponse ())
-  , dir "_activity" showActivity
-  , dir "_go"       goToPage
+--   , dir "_activity" showActivity
+--   , dir "_go"       goToPage
   , method GET >> dir "_search"   searchResults
-  , dir "_upload"   $  do guard =<< return . uploadsAllowed =<< getConfig
-                          msum [ method GET  >> authenticate ForModify uploadForm
-                                 , method POST >> authenticate ForModify uploadFile ]
+--   , dir "_upload"   $  do guard =<< return . uploadsAllowed =<< getConfig
+--                           msum [ method GET  >> authenticate ForModify uploadForm
+--                                  , method POST >> authenticate ForModify uploadFile ]
   , dir "_random"   $ method GET  >> randomPage
   , dir "_index"    indexPage
-  , dir "_feed"     feedHandler
-  , dir "_category" categoryPage
-  , dir "_categories" categoryListPage
+  , dir "_contents" contentsPage
+--   , dir "_feed"     feedHandler
+--   , dir "_category" categoryPage
+--   , dir "_categories" categoryListPage
   , dir "_expire"     expireCache
   , dir "_showraw"  $ msum
       [ showRawPage
@@ -187,26 +187,26 @@ wikiHandlers =
   , dir "_history"  $ msum
       [ showPageHistory
       , guardPath isSourceCode >> showFileHistory ]
-  , dir "_edit" $ authenticate ForModify (unlessNoEdit editPage showPage)
-  , dir "_diff" $ msum
-      [ showPageDiff
-      , guardPath isSourceCode >> showFileDiff ]
-  , dir "_discuss" discussPage
-  , dir "_delete" $ msum
-      [ method GET  >>
-          authenticate ForModify (unlessNoDelete confirmDelete showPage)
-      , method POST >>
-          authenticate ForModify (unlessNoDelete deletePage showPage) ]
-  , dir "_preview" preview
+--   , dir "_edit" $ authenticate ForModify (unlessNoEdit editPage showPage)
+--   , dir "_diff" $ msum
+--       [ showPageDiff
+--       , guardPath isSourceCode >> showFileDiff ]
+--   , dir "_discuss" discussPage
+--   , dir "_delete" $ msum
+--       [ method GET  >>
+--           authenticate ForModify (unlessNoDelete confirmDelete showPage)
+--       , method POST >>
+--           authenticate ForModify (unlessNoDelete deletePage showPage) ]
+--   , dir "_preview" preview
   , guardIndex >> indexPage
-  , guardCommand "export" >> exportPage
-  , method POST >> guardCommand "cancel" >> showPage
-  , method POST >> guardCommand "update" >>
-      authenticate ForModify (unlessNoEdit updatePage showPage)
+--   , guardCommand "export" >> exportPage
+--   , method POST >> guardCommand "cancel" >> showPage
+--   , method POST >> guardCommand "update" >>
+--       authenticate ForModify (unlessNoEdit updatePage showPage)
   , showPage
   , guardPath isSourceCode >> method GET >> showHighlightedSource
   , handleAny
-  , notFound =<< (guardPath isPage >> createPage)
+--   , notFound =<< (guardPath isPage >> createPage)
   ]
 
 -- | Recompiles the gitit templates.

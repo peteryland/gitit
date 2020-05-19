@@ -1,0 +1,393 @@
+gitit (0.13.0.0+mgnl-9) unstable; urgency=medium
+
+  * New upstream.
+  * Custom changes for use at Magnolia.
+
+ -- Pete Ryland <pete.ryland@magnolia-cms.com>  Mon, 11 May 2020 15:18:26 +0200
+
+gitit (0.12.3.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version.  closes: #900302.
+
+ -- Clint Adams <clint@debian.org>  Mon, 31 Dec 2018 18:10:40 -0500
+
+gitit (0.12.2.1+dfsg-6) unstable; urgency=medium
+
+  * Remove build dependency on libghc-parsec3-dev (provided by ghc-
+    8.4.3)
+
+ -- Ilias Tsitsimpis <iliastsi@debian.org>  Wed, 03 Oct 2018 12:06:10 +0300
+
+gitit (0.12.2.1+dfsg-5) unstable; urgency=medium
+
+  * Remove build dependency on libghc-mtl-dev (provided by ghc-8.4.3)
+  * Remove build dependency on libghc-text-dev (provided by ghc-8.4.3)
+
+ -- Ilias Tsitsimpis <iliastsi@debian.org>  Mon, 01 Oct 2018 13:47:24 +0300
+
+gitit (0.12.2.1+dfsg-4) unstable; urgency=medium
+
+  [ Clint Adams ]
+  * Set Rules-Requires-Root to no.
+
+  [ Ilias Tsitsimpis ]
+  * Bump debhelper compat level to 10
+
+ -- Ilias Tsitsimpis <iliastsi@debian.org>  Sun, 30 Sep 2018 21:01:18 +0300
+
+gitit (0.12.2.1+dfsg-3) unstable; urgency=medium
+
+  [ Ilias Tsitsimpis ]
+  * Use salsa.debian.org URLs in Vcs-{Browser,Git} fields
+
+  [ Clint Adams ]
+  * Bump to Standards-Version 4.1.4.
+
+ -- Clint Adams <clint@debian.org>  Mon, 09 Apr 2018 20:04:40 -0400
+
+gitit (0.12.2.1+dfsg-2) unstable; urgency=medium
+
+  * Add Recommends on libghc-filestore-data.  closes: #865605.
+
+ -- Clint Adams <clint@debian.org>  Wed, 03 Jan 2018 09:02:46 -0500
+
+gitit (0.12.2.1+dfsg-1) unstable; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * Team upload, import Ubuntu patch
+
+  [ Mathieu Trudel-Lapierre ]
+  * debian/patches/git_bump_hoauth2_3f6252d7.patch: cherry-pick the bump  for
+    minimal hoauth2 to 1.3.0 and uri-bytestring addition.
+  * debian/control: update Build-Depends for hoauth2 and uri-bytestring.
+    (Closes: #881599)
+
+  [ Sean Whitton ]
+  * Upload again with correct version number.
+    This was breaking `dht make-all`.
+
+  [ Ilias Tsitsimpis ]
+  * Change Priority to optional. Since Debian Policy version 4.0.1,
+    priority extra has been deprecated.
+  * Use the HTTPS form of the copyright-format URL
+  * Modify d/watch and Source field in d/copyright to use HTTPS
+  * Declare compliance with Debian policy 4.1.1
+
+ -- Sean Whitton <spwhitton@spwhitton.name>  Mon, 04 Sep 2017 19:59:06 -0700
+
+gitit (0.12.2.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Clint Adams <clint@debian.org>  Tue, 18 Jul 2017 23:06:03 -0400
+
+gitit (0.12.1.1+dfsg-6) unstable; urgency=medium
+
+  * Upload to unstable as part of GHC 8 transition.
+
+ -- Clint Adams <clint@debian.org>  Thu, 27 Oct 2016 18:32:17 -0400
+
+gitit (0.12.1.1+dfsg-5) experimental; urgency=medium
+
+  * Fix Build-Depends.
+
+ -- Clint Adams <clint@debian.org>  Mon, 24 Oct 2016 09:03:27 -0400
+
+gitit (0.12.1.1+dfsg-4) experimental; urgency=medium
+
+  * Patch for newer tagsoup.
+
+ -- Clint Adams <clint@debian.org>  Wed, 12 Oct 2016 12:34:03 -0400
+
+gitit (0.12.1.1+dfsg-3) experimental; urgency=medium
+
+  * Temporarily build-depend on ghc 8.
+
+ -- Clint Adams <clint@debian.org>  Mon, 17 Oct 2016 20:15:03 -0400
+
+gitit (0.12.1.1+dfsg-2) unstable; urgency=medium
+
+  * Use dh_link instead of dh_linktree
+    dh_linktree imposes a strong dependency against libjs-jquery. Use dh_link
+    to create the symlinks and avoid continuous uploading of the package.
+  * Remove unused lintian override
+    The minified javascript code has been removed from the source package,
+    so there is no reason to override the source-is-missing lintian warning.
+  * Add description to the jquery patch
+  * Remove duplicate entries from the Build-Depends field
+  * Fix spelling error in libghc-gitit-data package description
+
+ -- Ilias Tsitsimpis <i.tsitsimpis@gmail.com>  Thu, 23 Jun 2016 12:59:05 +0300
+
+gitit (0.12.1.1+dfsg-1) unstable; urgency=medium
+
+  [ Dmitry Bogatov ]
+  * Use secure (https) uri in Vcs-Git field in 'debian/control'
+  * Bump standards version to 3.9.8 (no changes needed)
+
+  [ Ilias Tsitsimpis ]
+  * New upstream release
+  * Specify the destination to use in the d/package.install files
+    The cabal-debian tool does not support the autodest feature of dh_install.
+  * Use dversionmangle in d/watch file to remove the Debian specific suffix
+
+ -- Ilias Tsitsimpis <i.tsitsimpis@gmail.com>  Mon, 30 May 2016 16:19:05 +0000
+
+gitit (0.12.1-2) unstable; urgency=medium
+
+  * Fix links to jquery (closes: #820469).
+
+ -- Giovanni Mascellani <gio@debian.org>  Tue, 03 May 2016 22:01:05 +0200
+
+gitit (0.12.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Joachim Breitner <nomeata@debian.org>  Mon, 22 Feb 2016 23:48:23 +0100
+
+gitit (0.12.0.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * Relax dependency on aeson.
+  * Relax dependency on hoauth2 (houth2-0.5 in LTS-4.0)
+  * Install forgotten `data/post-update' hook
+  * Update and refactor `debian/copyright'
+  * Drop javascript dependencies
+  * Add dependency, ensuring presence of
+    /usr/share/filestore/extra/post-update hook
+  * Clean-up gitit.cabal from references to missing .js files
+
+ -- Dmitry Bogatov <KAction@gnu.org>  Sat, 23 Jan 2016 12:54:30 +0300
+
+gitit (0.11.1.1-3) unstable; urgency=medium
+
+  * Switch Vcs-Git/Vcs-Browser headers to new location.
+
+ -- Clint Adams <clint@debian.org>  Thu, 03 Dec 2015 14:54:02 -0500
+
+gitit (0.11.1.1-2) experimental; urgency=medium
+
+  * Rebuild, to pick up newer libjs-jquery dependencies (Closes: #796809)
+
+ -- Joachim Breitner <nomeata@debian.org>  Fri, 20 Nov 2015 09:09:17 +0100
+
+gitit (0.11.1.1-1) experimental; urgency=medium
+
+  * New upstream release
+  * Depend on haskell-devscripts >= 0.10 to ensure that this package
+    builds against GHC in experimental
+
+ -- Joachim Breitner <nomeata@debian.org>  Thu, 20 Aug 2015 10:26:53 +0200
+
+gitit (0.10.7-4) unstable; urgency=medium
+
+  * Rebuild for sid due upgrade of libjs-jquery there (Closes: #796809)
+
+ -- Dmitry Bogatov <KAction@gnu.org>  Sat, 21 Nov 2015 10:45:15 +0300
+
+gitit (0.10.7-3) unstable; urgency=medium
+
+  * Remove bogus dependency on libghc-cgi-*
+
+ -- Joachim Breitner <nomeata@debian.org>  Thu, 16 Jul 2015 17:34:39 +0200
+
+gitit (0.10.7-2) unstable; urgency=high
+
+  * Add Breaks+Replaces to cope with the binary package split from
+    0.10.6.3+dfsg-1.  closes: #789741.
+
+ -- Clint Adams <clint@debian.org>  Wed, 24 Jun 2015 09:20:43 -0400
+
+gitit (0.10.7-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Clint Adams <clint@debian.org>  Fri, 05 Jun 2015 22:24:53 -0400
+
+gitit (0.10.6.3+dfsg-1) unstable; urgency=medium
+
+  * Let Homepage point to http://gitit.net/ (Closes: #773367)
+  * Depend on haskell-devscripts 0.9, found in experimental
+  * Do not depend on xhtml, which now comes with GHC
+  * Change section to web (Closes: #784813)
+  * New upstream release
+
+  [ Dmitry Bogatov ]
+  * Prefer jquery libraries from Debian packages over
+    bundled code.
+  * Simplify debian/copyright -- no licenses for JS code
+  * Use debian/clean file over manual tinkering in debian/rules
+  * Bump standards version (3.9.6)
+  * Repack to get rid of jquery in source tarball
+  * Separate -data package
+
+ -- Joachim Breitner <nomeata@debian.org>  Thu, 21 May 2015 23:42:58 +0200
+
+gitit (0.10.4-2) unstable; urgency=medium
+
+  * Add source files for minified JQuery (Closes: Bug#736189).
+  * Add lintian override for JQuery sources.
+
+ -- Anthony Towns <ajt@debian.org>  Wed, 01 Oct 2014 06:39:58 +1000
+
+gitit (0.10.4-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Clint Adams <clint@debian.org>  Mon, 30 Jun 2014 20:08:58 -0400
+
+gitit (0.10.3.1-6) unstable; urgency=medium
+
+  [ Joachim Breitner ]
+  * Adjust watch file to new hackage layout
+
+  [ Clint Adams ]
+  * Patch for newer pandoc.
+
+ -- Joachim Breitner <nomeata@debian.org>  Sat, 05 Oct 2013 18:19:28 +0200
+
+gitit (0.10.3.1-5) unstable; urgency=low
+
+  [ Joachim Breitner ]
+  * Fix Vcs-Darcs url: http://darcs.debian.org/ instead of
+    http://darcs.debian.org/darcs/
+
+  [ Louis Bettens ]
+  * /usr/share/gitit-0.10.3.1 -> /usr/share/gitit
+  * Bump version of Build-Depends: on haskell-devscripts
+
+ -- Louis Bettens <louis@bettens.info>  Mon, 29 Jul 2013 19:57:27 +0200
+
+gitit (0.10.3.1-4) unstable; urgency=low
+
+  * Enable compat level 9
+  * Use substvars for Haskell description blurbs
+
+ -- Joachim Breitner <nomeata@debian.org>  Fri, 24 May 2013 12:49:44 +0200
+
+gitit (0.10.3.1-3) experimental; urgency=low
+
+  * Fix GHCi detection: add missing $.
+
+ -- Colin Watson <cjwatson@debian.org>  Mon, 15 Apr 2013 20:49:26 +0100
+
+gitit (0.10.3.1-2) experimental; urgency=low
+
+  * Disable plugin support if GHCi is not available.
+
+ -- Colin Watson <cjwatson@debian.org>  Mon, 15 Apr 2013 11:40:21 +0100
+
+gitit (0.10.3.1-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Joachim Breitner <nomeata@debian.org>  Wed, 10 Apr 2013 10:53:30 +0200
+
+gitit (0.10.2-1) experimental; urgency=low
+
+  * Depend on haskell-devscripts 0.8.13 to ensure this package is built
+    against experimental
+  * Bump standards version, no change
+  * New upstream release
+  * New upstream release
+
+ -- Joachim Breitner <nomeata@debian.org>  Sat, 09 Feb 2013 23:16:53 +0100
+
+gitit (0.10.0.1-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Clint Adams <clint@debian.org>  Mon, 25 Jun 2012 22:51:19 -0400
+
+gitit (0.10-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Clint Adams <clint@debian.org>  Wed, 30 May 2012 21:37:10 -0400
+
+gitit (0.9.0.1-3) unstable; urgency=low
+
+  * Fix some runtime dependencies (closes: #673472).
+
+ -- Giovanni Mascellani <gio@debian.org>  Sat, 19 May 2012 10:41:52 +0200
+
+gitit (0.9.0.1-2) unstable; urgency=low
+
+  * Missing dependency on libghc-safe-dev.
+
+ -- Giovanni Mascellani <gio@debian.org>  Wed, 16 May 2012 09:55:02 +0200
+
+gitit (0.9.0.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Update Build-Dependencies.
+
+ -- Giovanni Mascellani <gio@debian.org>  Tue, 15 May 2012 11:05:58 +0200
+
+gitit (0.9-2) unstable; urgency=low
+
+  * Add a new patch to comment out a type signature which, when present,
+    causes the build to fail at the documentation generation stage. This is
+    due to an as-yet undiscovered bug elsewhere in the stack. The patch was
+    written by Iain Lane for the Ubuntu package.
+  * Build-Depends on libghc-ghc-paths-{dev,prof,doc} to have plugin
+    support (closes: #655061).
+  * Other minor fixes.
+
+ -- Giovanni Mascellani <gio@debian.org>  Thu, 26 Apr 2012 14:27:44 +0200
+
+gitit (0.9-1) unstable; urgency=low
+
+  * New upstream version.
+  * Bump to Standards-Version 3.9.3.
+
+ -- Clint Adams <clint@debian.org>  Sun, 04 Mar 2012 21:14:44 -0500
+
+gitit (0.8.1-1) unstable; urgency=low
+
+  [ Giovanni Mascellani ]
+  * Using new data package trackers.
+
+  [ Joachim Breitner ]
+  * New upstream release
+
+ -- Joachim Breitner <nomeata@debian.org>  Thu, 15 Sep 2011 20:14:44 +0200
+
+gitit (0.8.0.1-2) unstable; urgency=low
+
+  * Added manpage for gitit (closes: #631809).
+
+ -- Giovanni Mascellani <gio@debian.org>  Mon, 25 Jul 2011 21:12:12 +0200
+
+gitit (0.8.0.1-1) unstable; urgency=low
+
+  * New upstream release:
+    + Fixed file upload bug (closes: #629643);
+    + debian/patches: removed, integrated upstream.
+
+ -- Giovanni Mascellani <gio@debian.org>  Wed, 15 Jun 2011 10:38:13 +0200
+
+gitit (0.8-1) unstable; urgency=low
+
+  [ Marco Silva ]
+  * Use ghc instead of ghc6
+
+  [ Giovanni Mascellani ]
+  * New upstream release (closes: #626710, LP: #749185).
+  * debian/control:
+    + removing references to GHC 6;
+    + Standards-Version bumped to 3.9.2 (no changes required);
+    + build dependencies updated.
+  * debian/copyright:
+    + copyright years updated;
+    + a few new files added.
+  * debian/rules: minor fixes.
+  * debian/patches: added patch to relax SHA versioned dependency.
+
+ -- Giovanni Mascellani <gio@debian.org>  Wed, 01 Jun 2011 13:32:14 +0200
+
+gitit (0.7.3.6-1) unstable; urgency=low
+
+  * Initial release. (closes: #556099)
+
+ -- Giovanni Mascellani <gio@debian.org>  Fri, 06 Aug 2010 19:31:54 +0200

@@ -25,22 +25,22 @@ module Network.Gitit.Types (
                             PageType(..)
                            , FileStoreType(..)
                            , MathMethod(..)
-                           , AuthenticationLevel(..)
+--                            , AuthenticationLevel(..)
                            , Config(..)
                            , Page(..)
-                           , SessionKey
+--                            , SessionKey
                            -- we do not export SessionData constructors, in case we need to extend  SessionData with other data in the future
-                           , SessionData
-                           , SessionGithubData
-                           , sessionData
-                           , sessionGithubData
-                           , sessionDataGithubStateUrl
-                           , sessionUser
-                           , sessionGithubState
-                           , sessionGithubDestination
-                           , User(..)
-                           , Sessions(..)
-                           , Password(..)
+--                            , SessionData
+--                            , SessionGithubData
+--                            , sessionData
+--                            , sessionGithubData
+--                            , sessionDataGithubStateUrl
+--                            , sessionUser
+--                            , sessionGithubState
+--                            , sessionGithubDestination
+--                            , User(..)
+--                            , Sessions(..)
+--                            , Password(..)
                            , GititState(..)
                            , HasContext
                            , modifyContext
@@ -53,17 +53,18 @@ module Network.Gitit.Types (
                            , Context(..)
                            , PageLayout(..)
                            , Tab(..)
-                           , Recaptcha(..)
+--                            , Recaptcha(..)
                            , Params(..)
                            , Command(..)
                            , WikiState(..)
                            , GititServerPart
                            , Handler
                            , fromEntities
-                           , GithubConfig
-                           , oAuth2
-                           , org
-                           , githubConfig) where
+--                            , GithubConfig
+--                            , oAuth2
+--                            , org
+--                            , githubConfig
+                           ) where
 
 import Control.Monad.Reader (ReaderT, runReaderT, mplus)
 import Control.Monad.State (StateT, runStateT, get, modify)
@@ -84,7 +85,7 @@ import Data.FileStore.Types
 import Network.Gitit.Server
 import Text.HTML.TagSoup.Entity (lookupEntity)
 import Data.Char (isSpace)
-import Network.OAuth.OAuth2
+-- import Network.OAuth.OAuth2
 
 data PageType = Markdown
               | CommonMark
@@ -102,8 +103,8 @@ data FileStoreType = Git | Darcs | Mercurial deriving Show
 data MathMethod = MathML | WebTeX String | RawTeX | MathJax String
                   deriving (Read, Show, Eq)
 
-data AuthenticationLevel = Never | ForModify | ForRead
-                  deriving (Read, Show, Eq, Ord)
+-- data AuthenticationLevel = Never | ForModify | ForRead
+--                   deriving (Read, Show, Eq, Ord)
 
 -- | Data structure for information read from config file.
 data Config = Config {
@@ -122,15 +123,15 @@ data Config = Config {
   -- | Show Haskell code with bird tracks
   showLHSBirdTracks    :: Bool,
   -- | Combinator to set @REMOTE_USER@ request header
-  withUser             :: Handler -> Handler,
+--   withUser             :: Handler -> Handler,
   -- | Handler for login, logout, register, etc.
-  requireAuthentication :: AuthenticationLevel,
+--   requireAuthentication :: AuthenticationLevel,
   -- | Specifies which actions require authentication.
-  authHandler          :: Handler,
+--   authHandler          :: Handler,
   -- | Path of users database
-  userFile             :: FilePath,
+--   userFile             :: FilePath,
   -- | Seconds of inactivity before session expires
-  sessionTimeout       :: Int,
+--   sessionTimeout       :: Int,
   -- | Directory containing page templates
   templatesDir         :: FilePath,
   -- | Path of server log file
@@ -141,7 +142,7 @@ data Config = Config {
   -- | Path of static directory
   staticDir            :: FilePath,
   -- | Names of plugin modules to load
-  pluginModules        :: [String],
+--   pluginModules        :: [String],
   -- | Show table of contents on each page?
   tableOfContents      :: Bool,
   -- | Max size of file uploads
@@ -161,21 +162,21 @@ data Config = Config {
   -- | Pages that cannot be deleted via web
   noDelete             :: [String],
   -- | Default summary if description left blank
-  defaultSummary       :: String,
+--   defaultSummary       :: String,
   -- | Delete summary
-  deleteSummary        :: String,
+--   deleteSummary        :: String,
   -- | @Nothing@ = anyone can register.
   -- @Just (prompt, answers)@ = a user will
   -- be given the prompt and must give
   -- one of the answers to register.
-  accessQuestion       :: Maybe (String, [String]),
+--   accessQuestion       :: Maybe (String, [String]),
   -- | Use ReCAPTCHA for user registration.
-  useRecaptcha         :: Bool,
-  recaptchaPublicKey   :: String,
-  recaptchaPrivateKey  :: String,
+--   useRecaptcha         :: Bool,
+--   recaptchaPublicKey   :: String,
+--   recaptchaPrivateKey  :: String,
   -- | RPX domain and key
-  rpxDomain            :: String,
-  rpxKey               :: String,
+--   rpxDomain            :: String,
+--   rpxKey               :: String,
   -- | Should responses be compressed?
   compressResponses    :: Bool,
   -- | Should responses be cached?
@@ -185,13 +186,13 @@ data Config = Config {
   -- | Map associating mime types with file extensions
   mimeMap              :: M.Map String String,
   -- | Command to send notification emails
-  mailCommand          :: String,
+--   mailCommand          :: String,
   -- | Text of password reset email
-  resetPasswordMessage :: String,
+--   resetPasswordMessage :: String,
   -- | Markup syntax help for edit sidebar
   markupHelp           :: Text,
   -- | Provide an atom feed?
-  useFeed              :: Bool,
+--   useFeed              :: Bool,
   -- | Base URL of wiki, for use in feed
   baseUrl              :: String,
   -- | Title of wiki, used in feed
@@ -199,9 +200,9 @@ data Config = Config {
   -- | Should WikiLinks be absolute w.r.t. the base URL?
   wikiTitle            :: String,
   -- | Number of days history to be included in feed
-  feedDays             :: Integer,
+--   feedDays             :: Integer,
   -- | Number of minutes to cache feeds before refreshing
-  feedRefreshTime      :: Integer,
+--   feedRefreshTime      :: Integer,
   -- | Allow PDF export?
   pdfExport            :: Bool,
   -- | Directory to search for pandoc customizations
@@ -209,10 +210,10 @@ data Config = Config {
   -- | Filter HTML through xss-sanitize
   xssSanitize          :: Bool,
   -- | The default number of days in the past to look for \"recent\" activity
-  recentActivityDays   :: Int,
+  recentActivityDays   :: Int
   -- | Github client data for authentication (id, secret, callback,
   -- authorize endpoint, access token endpoint)
-  githubAuth           :: GithubConfig
+--   githubAuth           :: GithubConfig
   }
 
 -- | Data for rendering a wiki page.
@@ -227,41 +228,41 @@ data Page = Page {
   , pageMeta        :: [(String, String)]
 } deriving (Read, Show)
 
-type SessionKey = Integer
+-- type SessionKey = Integer
 
-data SessionData = SessionData {
-  sessionUser :: Maybe String,
-  sessionGithubData :: Maybe SessionGithubData
-} deriving (Read,Show,Eq)
+-- data SessionData = SessionData {
+--   sessionUser :: Maybe String,
+--   sessionGithubData :: Maybe SessionGithubData
+-- } deriving (Read,Show,Eq)
 
-data SessionGithubData = SessionGithubData {
-  sessionGithubState :: String,
-  sessionGithubDestination :: String
-} deriving (Read, Show, Eq)
+-- data SessionGithubData = SessionGithubData {
+--   sessionGithubState :: String,
+--   sessionGithubDestination :: String
+-- } deriving (Read, Show, Eq)
 
-sessionData :: String -> SessionData
-sessionData user = SessionData (Just user) Nothing
+-- sessionData :: String -> SessionData
+-- sessionData user = SessionData (Just user) Nothing
 
-sessionDataGithubStateUrl :: String -> String -> SessionData
-sessionDataGithubStateUrl githubState destination = SessionData Nothing (Just $ SessionGithubData githubState destination)
+-- sessionDataGithubStateUrl :: String -> String -> SessionData
+-- sessionDataGithubStateUrl githubState destination = SessionData Nothing (Just $ SessionGithubData githubState destination)
 
-data Sessions a = Sessions {unsession::M.Map SessionKey a}
-  deriving (Read,Show,Eq)
+-- data Sessions a = Sessions {unsession::M.Map SessionKey a}
+--   deriving (Read,Show,Eq)
 
 -- Password salt hashedPassword
-data Password = Password { pSalt :: String, pHashed :: String }
-  deriving (Read,Show,Eq)
+-- data Password = Password { pSalt :: String, pHashed :: String }
+--   deriving (Read,Show,Eq)
 
-data User = User {
-  uUsername :: String,
-  uPassword :: Password,
-  uEmail    :: String
-} deriving (Show,Read)
+-- data User = User {
+--   uUsername :: String,
+--   uPassword :: Password,
+--   uEmail    :: String
+-- } deriving (Show,Read)
 
 -- | Common state for all gitit wikis in an application.
 data GititState = GititState {
-  sessions       :: Sessions SessionData,
-  users          :: M.Map String User,
+--   sessions       :: Sessions SessionData,
+--   users          :: M.Map String User,
   templatesPath  :: FilePath,
   renderPage     :: PageLayout -> Html -> Handler,
   plugins        :: [Plugin]
@@ -274,7 +275,7 @@ data Plugin = PageTransform (Pandoc -> PluginM Pandoc)
             | PreCommitTransform (String -> PluginM String)
 
 data PluginData = PluginData { pluginConfig    :: Config
-                             , pluginUser      :: Maybe User
+--                              , pluginUser      :: Maybe User
                              , pluginRequest   :: Request
                              , pluginFileStore :: FileStore
                              }
@@ -308,6 +309,7 @@ instance HasContext PluginM where
 -- | Abstract representation of page layout (tabs, scripts, etc.)
 data PageLayout = PageLayout
   { pgPageName       :: String
+  , pgFileName       :: String
   , pgRevision       :: Maybe String
   , pgPrintable      :: Bool
   , pgMessages       :: [String]
@@ -318,7 +320,7 @@ data PageLayout = PageLayout
   , pgMarkupHelp     :: Maybe Text
   , pgTabs           :: [Tab]
   , pgSelectedTab    :: Tab
-  , pgLinkToFeed     :: Bool
+--   , pgLinkToFeed     :: Bool
   }
 
 data Tab = ViewTab
@@ -328,27 +330,27 @@ data Tab = ViewTab
          | DiffTab
          deriving (Eq, Show)
 
-data Recaptcha = Recaptcha {
-    recaptchaChallengeField :: String
-  , recaptchaResponseField  :: String
-  } deriving (Read, Show)
+-- data Recaptcha = Recaptcha {
+--     recaptchaChallengeField :: String
+--   , recaptchaResponseField  :: String
+--   } deriving (Read, Show)
 
-instance FromData SessionKey where
-     fromData = readCookieValue "sid"
+-- instance FromData SessionKey where
+--      fromData = readCookieValue "sid"
 
-data Params = Params { pUsername     :: String
-                     , pPassword     :: String
-                     , pPassword2    :: String
-                     , pRevision     :: Maybe String
+data Params = Params { -- pUsername     :: String
+--                      , pPassword     :: String
+--                      , pPassword2    :: String
+                     pRevision     :: Maybe String
                      , pDestination  :: String
-                     , pForUser      :: Maybe String
+--                      , pForUser      :: Maybe String
                      , pSince        :: Maybe UTCTime
                      , pRaw          :: String
                      , pLimit        :: Int
                      , pPatterns     :: [String]
                      , pGotoPage     :: String
-                     , pFileToDelete :: String
-                     , pEditedText   :: Maybe String
+--                      , pFileToDelete :: String
+--                      , pEditedText   :: Maybe String
                      , pMessages     :: [String]
                      , pFrom         :: Maybe String
                      , pTo           :: Maybe String
@@ -364,8 +366,8 @@ data Params = Params { pUsername     :: String
                      , pFilename     :: String
                      , pFilePath     :: FilePath
                      , pConfirm      :: Bool
-                     , pSessionKey   :: Maybe SessionKey
-                     , pRecaptcha    :: Recaptcha
+--                      , pSessionKey   :: Maybe SessionKey
+--                      , pRecaptcha    :: Recaptcha
                      , pResetCode    :: String
                      , pRedirect     :: Maybe Bool
                      }  deriving Show
@@ -381,26 +383,26 @@ instance FromReqURI [String] where
 instance FromData Params where
      fromData = do
          let look' = look
-         un <- look' "username"       `mplus` return ""
-         pw <- look' "password"       `mplus` return ""
-         p2 <- look' "password2"      `mplus` return ""
+--          un <- look' "username"       `mplus` return ""
+--          pw <- look' "password"       `mplus` return ""
+--          p2 <- look' "password2"      `mplus` return ""
          rv <- (look' "revision" >>= \s ->
                  return (if null s then Nothing else Just s))
                  `mplus` return Nothing
-         fu <- liftM Just (look' "forUser") `mplus` return Nothing
+--          fu <- liftM Just (look' "forUser") `mplus` return Nothing
          si <- liftM (parseTimeM True defaultTimeLocale "%Y-%m-%d") (look' "since")
                  `mplus` return Nothing  -- YYYY-mm-dd format
          ds <- look' "destination" `mplus` return ""
          ra <- look' "raw"            `mplus` return ""
          lt <- lookRead "limit"       `mplus` return 100
-         pa <- look' "patterns"       `mplus` return ""
+         pa <- look' "q"              `mplus` return ""
          gt <- look' "gotopage"       `mplus` return ""
-         ft <- look' "filetodelete"   `mplus` return ""
+--          ft <- look' "filetodelete"   `mplus` return ""
          me <- looks "message"
          fm <- liftM Just (look' "from") `mplus` return Nothing
          to <- liftM Just (look' "to")   `mplus` return Nothing
-         et <- liftM (Just . filter (/='\r')) (look' "editedText")
-                 `mplus` return Nothing
+--          et <- liftM (Just . filter (/='\r')) (look' "editedText")
+--                  `mplus` return Nothing
          fo <- look' "format"         `mplus` return ""
          sh <- look' "sha1"           `mplus` return ""
          lm <- look' "logMsg"         `mplus` return ""
@@ -415,30 +417,30 @@ instance FromData Params where
                              Nothing      -> ("","")
          ac <- look' "accessCode"     `mplus` return ""
          cn <- (look' "confirm" >> return True) `mplus` return False
-         sk <- liftM Just (readCookieValue "sid") `mplus` return Nothing
-         rc <- look' "recaptcha_challenge_field" `mplus` return ""
-         rr <- look' "recaptcha_response_field" `mplus` return ""
+--          sk <- liftM Just (readCookieValue "sid") `mplus` return Nothing
+--          rc <- look' "recaptcha_challenge_field" `mplus` return ""
+--          rr <- look' "recaptcha_response_field" `mplus` return ""
          rk <- look' "reset_code" `mplus` return ""
          rd <- (look' "redirect" >>= \r -> return (case r of
              "yes" -> Just True
              "no" -> Just False
              _ -> Nothing)) `mplus` return Nothing
-         return   Params { pUsername     = un
-                         , pPassword     = pw
-                         , pPassword2    = p2
-                         , pRevision     = rv
-                         , pForUser      = fu
+         return   Params { -- pUsername     = un
+--                          , pPassword     = pw
+--                          , pPassword2    = p2
+                         pRevision     = rv
+--                          , pForUser      = fu
                          , pSince        = si
                          , pDestination  = ds
                          , pRaw          = ra
                          , pLimit        = lt
                          , pPatterns     = words pa
                          , pGotoPage     = gt
-                         , pFileToDelete = ft
+--                          , pFileToDelete = ft
                          , pMessages     = me
                          , pFrom         = fm
                          , pTo           = to
-                         , pEditedText   = et
+--                          , pEditedText   = et
                          , pFormat       = fo
                          , pSHA1         = sh
                          , pLogMsg       = lm
@@ -451,10 +453,10 @@ instance FromData Params where
                          , pFilePath     = fp
                          , pAccessCode   = ac
                          , pConfirm      = cn
-                         , pSessionKey   = sk
-                         , pRecaptcha    = Recaptcha {
-                              recaptchaChallengeField = rc,
-                              recaptchaResponseField = rr }
+--                          , pSessionKey   = sk
+--                          , pRecaptcha    = Recaptcha {
+--                               recaptchaChallengeField = rc,
+--                               recaptchaResponseField = rr }
                          , pResetCode    = rk
                          , pRedirect     = rd
                          }
@@ -491,9 +493,9 @@ fromEntities ('&':xs) =
 fromEntities (x:xs) = x : fromEntities xs
 fromEntities [] = []
 
-data GithubConfig = GithubConfig { oAuth2 :: OAuth2
-                                 , org :: Maybe Text
-                                 }
+-- data GithubConfig = GithubConfig { oAuth2 :: OAuth2
+--                                  , org :: Maybe Text
+--                                  }
 
-githubConfig :: OAuth2 -> Maybe Text -> GithubConfig
-githubConfig = GithubConfig
+-- githubConfig :: OAuth2 -> Maybe Text -> GithubConfig
+-- githubConfig = GithubConfig

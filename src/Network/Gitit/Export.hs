@@ -50,7 +50,10 @@ import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import Data.List (isPrefixOf)
 import Skylighting (styleToCss, pygments)
-import Paths_gitit (getDataFileName)
+import qualified Data.Text.IO as TIO
+
+instance TemplateMonad PandocIO where
+  getPartial = liftIO . TIO.readFile
 
 defaultRespOptions :: WriterOptions
 defaultRespOptions = def { writerHighlightStyle = Just pygments }
@@ -247,7 +250,7 @@ respondPDF useBeamer page old_pndc = fixURLs page old_pndc >>= \pndc -> do
 fixURLs :: String -> Pandoc -> GititServerPart Pandoc
 fixURLs page pndc = do
     cfg <- getConfig
-    defaultStatic <- liftIO $ getDataFileName $ "data" </> "static"
+    let defaultStatic = "/usr/share/gitit/data" </> "static"
 
     let static = staticDir cfg
     let repoPath = repositoryPath cfg

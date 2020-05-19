@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+DEB_DH_INSTALL_ARGS := --sourcedir=tmp-inst-ghc --with=systemd
+
+MANPAGES := gitit.1 expireGititCache.1
+
+DB2MAN = /usr/share/sgml/docbook/stylesheet/xsl/docbook-xsl/manpages/docbook.xsl
+XP     = xsltproc -''-nonet -''-param man.charmap.use.subset "0"
+
+%.1: debian/%.xml
+	$(XP) $(DB2MAN) $<
+
+%:
+	dh $@ $(DEB_DH_INSTALL_ARGS)
+
+override_dh_installman: $(MANPAGES)
+	dh_installman
+
+override_dh_auto_configure:
+	mkdir tmp-inst-ghc
+	dh_auto_configure
+
+override_dh_auto_build:
+	dh_auto_build
+	make

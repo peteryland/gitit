@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, DeriveGeneric #-}
 {-
 Copyright (C) 2008-9 John MacFarlane <jgm@berkeley.edu>
 
@@ -24,13 +24,13 @@ module Network.Gitit.Handlers (
                         handleAny
                       , debugHandler
                       , randomPage
-                      , discussPage
-                      , createPage
-                      , showActivity
+--                       , discussPage
+--                       , createPage
+--                       , showActivity
                       , goToPage
                       , searchResults
-                      , uploadForm
-                      , uploadFile
+--                       , uploadForm
+--                       , uploadFile
                       , indexPage
                       , categoryPage
                       , categoryListPage
@@ -43,44 +43,48 @@ module Network.Gitit.Handlers (
                       , showPageDiff
                       , showFileDiff
                       , exportPage
-                      , updatePage
-                      , editPage
-                      , deletePage
-                      , confirmDelete
+--                       , updatePage
+--                       , editPage
+--                       , deletePage
+--                       , confirmDelete
                       , showHighlightedSource
                       , expireCache
-                      , feedHandler
+--                       , feedHandler
+                      , contentsPage
                       )
 where
 import Safe
+import GHC.Generics (Generic)
 import Network.Gitit.Server
 import Network.Gitit.Framework
 import Network.Gitit.Layout
 import Network.Gitit.Types
-import Network.Gitit.Feed (filestoreToXmlFeed, FeedConfig(..))
+-- import Network.Gitit.Feed (filestoreToXmlFeed, FeedConfig(..))
 import Network.Gitit.Util (orIfNull)
 import Network.Gitit.Cache (expireCachedFile, lookupCache, cacheContents)
 import Network.Gitit.ContentTransformer (showRawPage, showFileAsText, showPage,
-        exportPage, showHighlightedSource, preview, applyPreCommitPlugins)
+        exportPage, showHighlightedSource, preview) -- , applyPreCommitPlugins)
 import Network.Gitit.Page (readCategories)
 import qualified Control.Exception as E
 import System.FilePath
 import Network.Gitit.State
 import Text.XHtml hiding ( (</>), dir, method, password, rev )
-import qualified Text.XHtml as X ( method )
-import Data.List (intercalate, intersperse, delete, nub, sortBy, find, isPrefixOf, inits, sort, (\\))
+-- import qualified Text.XHtml as X ( method )
+import Data.List (intercalate, delete, nub, sortBy, find, isPrefixOf, isInfixOf, isSuffixOf, inits, sort, (\\), partition) -- intersperse,
 import Data.List.Split (wordsBy)
-import Data.Maybe (fromMaybe, mapMaybe, isJust, catMaybes)
+import Data.Maybe (fromMaybe, mapMaybe, catMaybes) -- isJust,
 import Data.Ord (comparing)
-import Data.Char (toLower, isSpace)
+import Data.Char (toLower) --, isSpace)
 import Control.Monad.Reader
 import qualified Data.ByteString.Lazy as B
+import qualified Data.ByteString.Lazy.UTF8 as BLU
 import qualified Data.ByteString as S
 import Network.HTTP (urlEncodeVars)
-import Data.Time (getCurrentTime, addUTCTime)
-import Data.Time.Clock (diffUTCTime, UTCTime(..))
+import Data.Time (getCurrentTime) --, addUTCTime)
+import Data.Time.Clock (UTCTime(..))
 import Data.FileStore
 import System.Log.Logger (logM, Priority(..))
+import qualified Data.Aeson as J
 
 handleAny :: Handler
 handleAny = withData $ \(params :: Params) -> uriRest $ \uri ->
@@ -123,6 +127,7 @@ randomPage = do
        seeOther (base' ++ urlForPage newPage) $ toResponse $
          p << "Redirecting to a random page"
 
+{-
 discussPage :: Handler
 discussPage = do
   page <- getPage
@@ -150,7 +155,7 @@ createPage = do
                               ("Create the page '" ++ page ++ "'")
                       , anchor !
                             [href $ base' ++ "/_search?" ++
-                                (urlEncodeVars [("patterns", page)])] <<
+                                (urlEncodeVars [("q", page)])] <<
                               ("Search for pages containing the text '" ++
                                 page ++ "'")])
 
@@ -241,6 +246,7 @@ uploadFile = withData $ \(params :: Params) -> do
                        pgTitle = "Upload successful"}
                      contents
      else withMessages errors uploadForm
+-}
 
 goToPage :: Handler
 goToPage = withData $ \(params :: Params) -> do
@@ -273,46 +279,54 @@ searchResults = withData $ \(params :: Params) -> do
                    then return []
                    else liftIO $ E.catch (search fs SearchQuery{
                                                   queryPatterns = patterns
-                                                , queryWholeWords = True
+                                                , queryWholeWords = False
                                                 , queryMatchAll = True
                                                 , queryIgnoreCase = True })
                                        -- catch error, because newer versions of git
                                        -- return 1 on no match, and filestore <=0.3.3
                                        -- doesn't handle this properly:
                                        (\(_ :: FileStoreError)  -> return [])
-  let contentMatches = map matchResourceName matchLines
-  allPages <- liftIO (index fs) >>= filterM isPageFile
-  let slashToSpace = map (\c -> if c == '/' then ' ' else c)
+  let contentMatches = filter ("Magnolia" `isPrefixOf`) $ map matchResourceName matchLines
+  allPages <- filter ("Magnolia" `isPrefixOf`) <$> liftIO (index fs) >>= filterM isPageFile
+  let slashToSpace = map (\x -> if x == '/' then ' ' else x)
   let inPageName pageName' x = x `elem` (words $ slashToSpace $ dropExtension pageName')
   let matchesPatterns pageName' = not (null patterns) &&
        all (inPageName (map toLower pageName')) (map (map toLower) patterns)
   let pageNameMatches = filter matchesPatterns allPages
-  prunedFiles <- filterM isPageFile (contentMatches ++ pageNameMatches)
+  let partialMatchesPatterns pageName' = not (null patterns) &&
+       any (inPageName (map toLower pageName')) (map (map toLower) patterns)
+  let partialPageNameMatches = filter partialMatchesPatterns allPages
+  prunedFiles <- filterM isPageFile (pageNameMatches ++ contentMatches ++ partialPageNameMatches)
   let allMatchedFiles = nub $ prunedFiles
   let matchesInFile f =  mapMaybe (\x -> if matchResourceName x == f
                                             then Just (matchLine x)
                                             else Nothing) matchLines
   let matches = map (\f -> (f, matchesInFile f)) allMatchedFiles
-  let relevance (f, ms) = length ms + if f `elem` pageNameMatches
-                                         then 100
-                                         else 0
+  let relevance (f, ms) = length ms + (if f `elem` partialPageNameMatches then 100 else 0)
+                                    + (if f `elem` pageNameMatches then 1000 else 0)
+                                    + (if map toLower (unwords patterns) `isInfixOf` map toLower f then 10000 else 0)
+                                    + (if ('/':map toLower (unwords patterns) ++ "/") `isInfixOf` map toLower f then 20000 else 0)
+                                    + (if ('/':map toLower (unwords patterns)) `isSuffixOf` map toLower (dropExtension f) then 1000000 else 0)
   let preamble = if null patterns
                     then h3 << ["Please enter a search term."]
-                    else h3 << [ stringToHtml (show (length matches) ++ " matches found for ")
-                               , thespan ! [identifier "pattern"] << unwords patterns]
+                    else h3 << [ stringToHtml "Showing top matches for "
+                               , thespan ! [identifier "q"] << unwords patterns]
   base' <- getWikiBase
-  let toMatchListItem (file, contents) = li <<
-        [ anchor ! [href $ base' ++ urlForPage (dropExtension file)] << dropExtension file
-        , stringToHtml (" (" ++ show (length contents) ++ " matching lines)")
-        , stringToHtml " "
-        , anchor ! [href "#", theclass "showmatch",
-                    thestyle "display: none;"] << if length contents > 0
-                                                     then "[show matches]"
-                                                     else ""
-        , pre ! [theclass "matches"] << unlines contents]
+  let prettyFile f = case f of
+                       ""       -> ""
+                       ('/':xs) -> " » " ++ prettyFile xs
+                       (x:xs)   -> x : prettyFile xs
+  let toMatchListItem (file, _) = li <<
+        [ anchor ! [href $ base' ++ urlForPage (dropExtension file)] << prettyFile (dropExtension file) ]
+--         , stringToHtml (" (" ++ show (length contents) ++ " matching lines)")
+--         , stringToHtml " "
+--         , anchor ! [href "#", theclass "showmatch",
+--                     thestyle "display: none;"] << if length contents > 0
+--                                                      then "[show matches]"
+--                                                      else ""
+--         , pre ! [theclass "matches"] << unlines contents]
   let htmlMatches = preamble +++
-                    olist << map toMatchListItem
-                             (reverse $ sortBy (comparing relevance) matches)
+                    ulist ! [theclass "searchresults"] << take 100 (map toMatchListItem $ reverse $ sortBy (comparing relevance) matches)
   formattedPage defaultPageLayout{
                   pgMessages = pMessages params,
                   pgShowPageTools = False,
@@ -385,6 +399,7 @@ showHistory file page params =  do
                    pgTitle = ("Changes to " ++ page)
                    } $ contents +++ more
 
+{-
 showActivity :: Handler
 showActivity = withData $ \(params :: Params) -> do
   cfg <- getConfig
@@ -393,7 +408,7 @@ showActivity = withData $ \(params :: Params) -> do
   let daysAgo = addUTCTime (defaultDaysAgo * (-60) * 60 * 24) currTime
   let since = case pSince params of
                    Nothing -> Just daysAgo
-                   Just t  -> Just t
+                   Just x  -> Just x
   let forUser = pForUser params
   fs <- getFileStore
   hist <- liftIO $ history fs [] (TimeRange since Nothing)
@@ -431,6 +446,7 @@ showActivity = withData $ \(params :: Params) -> do
                   pgTabs = [],
                   pgTitle = "Recent changes"
                   } (heading +++ contents)
+-}
 
 showPageDiff :: Handler
 showPageDiff = withData $ \(params :: Params) -> do
@@ -455,11 +471,11 @@ showDiff file page params = do
   from' <- case (from, to) of
               (Just _, _)        -> return from
               (Nothing, Nothing) -> return from
-              (Nothing, Just t)  -> do
+              (Nothing, Just x)  -> do
                 pageHist <- liftIO $ history fs [file]
                                      (TimeRange Nothing Nothing)
                                      Nothing
-                let (_, upto) = break (\r -> idsMatch fs (revId r) t)
+                let (_, upto) = break (\r -> idsMatch fs (revId r) x)
                                   pageHist
                 return $ if length upto >= 2
                             -- immediately preceding revision
@@ -492,6 +508,7 @@ getDiff fs file from to = do
               " to " ++ fromMaybe "current" to) +++
            pre ! [theclass "diff"] << map diffLineToHtml rawDiff
 
+{-
 editPage :: Handler
 editPage = withData editPage'
 
@@ -502,22 +519,22 @@ editPage' params = do
   page <- getPage
   cfg <- getConfig
   let getRevisionAndText = E.catch
-        (do c <- liftIO $ retrieve fs (pathForPage page $ defaultExtension cfg) rev
+        (do x <- liftIO $ retrieve fs (pathForPage page $ defaultExtension cfg) rev
             -- even if pRevision is set, we return revId of latest
             -- saved version (because we're doing a revert and
             -- we don't want gitit to merge the changes with the
             -- latest version)
             r <- liftIO $ latest fs (pathForPage page $ defaultExtension cfg) >>= revision fs
-            return (Just $ revId r, c))
+            return (Just $ revId r, x))
         (\e -> if e == NotFound
                   then return (Nothing, "")
                   else E.throwIO e)
   (mbRev, raw) <- case pEditedText params of
                          Nothing -> liftIO getRevisionAndText
-                         Just t  -> let r = if null (pSHA1 params)
+                         Just x  -> let r = if null (pSHA1 params)
                                                then Nothing
                                                else Just (pSHA1 params)
-                                    in return (r, t)
+                                    in return (r, x)
   let messages = pMessages params
   let logMsg = pLogMsg params
   let sha1Box = case mbRev of
@@ -662,6 +679,42 @@ updatePage = withData $ \(params :: Params) -> do
                  params{ pEditedText = Just mergedText,
                          pSHA1       = revId mergedWithRev,
                          pMessages   = [mergeMsg] }
+-}
+
+data ContentTree = ContentTree { t :: String, c :: [ContentTree] } deriving (Generic, Show)
+
+instance J.ToJSON ContentTree where
+
+contentsPage :: Handler
+contentsPage = do
+  mbCached <- lookupCache "_contents"
+  let emptyResponse = setContentType "application/json; charset=utf-8" $ toResponse noHtml
+  case mbCached of
+    Nothing -> do
+      fs <- getFileStore
+      i <- filter (not . null) . map (drop 1 . dropWhile (/= '/')) . filter ("Magnolia" `isPrefixOf`) . map dropExtension . filter (".page" `isExtensionOf`) <$> (liftIO $ index fs)
+      let resp' = setContentType "application/json; charset=utf-8" (toResponse noHtml) {rsBody = BLU.fromString $ BLU.toString $ J.encode $ mkContents i}
+      cacheContents "_contents" $ S.concat $ B.toChunks $ rsBody resp'
+      ok resp'
+    Just (_, contents) -> ok emptyResponse {rsBody = B.fromChunks [contents]}
+  where
+    mkContents :: [String] -> [ContentTree]
+    mkContents (s:ss) = let (children, other) = partition ((s ++ "/") `isPrefixOf`) ss
+                            children' = mkContents $ map (drop $ length s + 1) children
+                            other'    = mkContents other
+                            s'        = splitOn (== '/') s
+                        in  diveDeep s' children' : other'
+    mkContents []     = []
+    splitOn :: (a -> Bool) -> [a] -> [[a]]
+    splitOn p' (x:xs) = case (p' x, splitOn p' xs) of
+                          (True,  yss)      -> []:yss
+                          (False, [])       -> [[x]]
+                          (False, (ys:yss)) -> (x:ys):yss
+    splitOn _ []     = []
+    diveDeep :: [String] -> [ContentTree] -> ContentTree
+    diveDeep [s]    cs = ContentTree s cs
+    diveDeep (s:ss) cs = ContentTree s [diveDeep ss cs]
+    diveDeep []     cs = ContentTree "" cs -- Probably shouldn't happen
 
 indexPage :: Handler
 indexPage = do
@@ -777,38 +830,38 @@ expireCache = do
   expireCachedFile page
   ok $ toResponse ()
 
-feedHandler :: Handler
-feedHandler = do
-  cfg <- getConfig
-  when (not $ useFeed cfg) mzero
-  base' <- getWikiBase
-  feedBase <- if null (baseUrl cfg)  -- if baseUrl blank, try to get it from Host header
-                 then do
-                   mbHost <- getHost
-                   case mbHost of
-                        Nothing    -> error "Could not determine base URL"
-                        Just hn    -> return $ "http://" ++ hn ++ base'
-                 else case baseUrl cfg ++ base' of
-                           w@('h':'t':'t':'p':'s':':':'/':'/':_) -> return w
-                           x@('h':'t':'t':'p':':':'/':'/':_) -> return x
-                           y                                 -> return $ "http://" ++ y
-  let fc = FeedConfig{
-              fcTitle = wikiTitle cfg
-            , fcBaseUrl = feedBase
-            , fcFeedDays = feedDays cfg }
-  path' <- getPath     -- e.g. "foo/bar" if they hit /_feed/foo/bar
-  let file = (path' `orIfNull` "_site") <.> "feed"
-  let mbPath = if null path' then Nothing else Just path'
-  -- first, check for a cached version that is recent enough
-  now <- liftIO getCurrentTime
-  let isRecentEnough t = truncate (diffUTCTime now t) < 60 * feedRefreshTime cfg
-  mbCached <- lookupCache file
-  case mbCached of
-       Just (modtime, contents) | isRecentEnough modtime -> do
-            let emptyResponse = setContentType "application/atom+xml; charset=utf-8" . toResponse $ ()
-            ok $ emptyResponse{rsBody = B.fromChunks [contents]}
-       _ -> do
-            fs <- getFileStore
-            resp' <- liftM toResponse $ liftIO (filestoreToXmlFeed fc fs mbPath)
-            cacheContents file $ S.concat $ B.toChunks $ rsBody resp'
-            ok . setContentType "application/atom+xml; charset=UTF-8" $ resp'
+-- feedHandler :: Handler
+-- feedHandler = do
+--   cfg <- getConfig
+--   when (not $ useFeed cfg) mzero
+--   base' <- getWikiBase
+--   feedBase <- if null (baseUrl cfg)  -- if baseUrl blank, try to get it from Host header
+--                  then do
+--                    mbHost <- getHost
+--                    case mbHost of
+--                         Nothing    -> error "Could not determine base URL"
+--                         Just hn    -> return $ "http://" ++ hn ++ base'
+--                  else case baseUrl cfg ++ base' of
+--                            w@('h':'t':'t':'p':'s':':':'/':'/':_) -> return w
+--                            x@('h':'t':'t':'p':':':'/':'/':_) -> return x
+--                            y                                 -> return $ "http://" ++ y
+--   let fc = FeedConfig{
+--               fcTitle = wikiTitle cfg
+--             , fcBaseUrl = feedBase
+--             , fcFeedDays = feedDays cfg }
+--   path' <- getPath     -- e.g. "foo/bar" if they hit /_feed/foo/bar
+--   let file = (path' `orIfNull` "_site") <.> "feed"
+--   let mbPath = if null path' then Nothing else Just path'
+--   -- first, check for a cached version that is recent enough
+--   now <- liftIO getCurrentTime
+--   let isRecentEnough x = truncate (diffUTCTime now x) < 60 * feedRefreshTime cfg
+--   mbCached <- lookupCache file
+--   case mbCached of
+--        Just (modtime, contents) | isRecentEnough modtime -> do
+--             let emptyResponse = setContentType "application/atom+xml; charset=utf-8" . toResponse $ ()
+--             ok $ emptyResponse{rsBody = B.fromChunks [contents]}
+--        _ -> do
+--             fs <- getFileStore
+--             resp' <- liftM toResponse $ liftIO (filestoreToXmlFeed fc fs mbPath)
+--             cacheContents file $ S.concat $ B.toChunks $ rsBody resp'
+--             ok . setContentType "application/atom+xml; charset=UTF-8" $ resp'

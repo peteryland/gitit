@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Network.Gitit.Page ( stringToPage
                           , pageToString
                           , readCategories
+                          , readKeywords
                           )
 where
 import Network.Gitit.Types
@@ -157,6 +158,21 @@ pageToString conf page' =
                    (unlines (map (\(k, v) -> k ++ ": " ++ v) metadata))
   in (if null metadata' then "" else "---\n" ++ metadata' ++ "...\n\n")
         ++ pageText page'
+
+readKeywords :: FilePath -> IO (Maybe String, [String])
+readKeywords f =
+  withFile f ReadMode $ \h ->
+    E.catch (do fl <- B.hGetLine h
+                if dashline fl
+                   then do -- get rest of metadata
+                     rest <- hGetLinesTill h dotOrDashline
+                     let (md,_) = parseMetadata $ unlines $ "---":rest
+                     return (lookup "title" md, splitKeywords $ fromMaybe "" $ lookup "keywords" md)
+                   else return (Nothing, []))
+       (\e -> if isEOFError e then return (Nothing, []) else E.throwIO e)
+  where
+    splitKeywords = words . map puncToSpace
+    puncToSpace c = if c `elem` "[,.:]" then ' ' else c
 
 -- | Read categories from metadata strictly.
 readCategories :: FilePath -> IO [String]

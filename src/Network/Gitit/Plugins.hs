@@ -20,13 +20,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 {- Functions for loading plugins.
 -}
 
-module Network.Gitit.Plugins ( loadPlugin, loadPlugins )
+module Network.Gitit.Plugins ( loadPlugins )
 where
 import Network.Gitit.Types
-import System.FilePath (takeBaseName)
-import Control.Monad (unless)
-import System.Log.Logger (logM, Priority(..))
-#ifdef _PLUGINS
+-- import System.FilePath (takeBaseName)
+-- import Control.Monad (unless)
+-- import System.Log.Logger (logM, Priority(..))
+
+import qualified Network.Gitit.Mgnl as Mgnl (plugin)
+
+loadPlugins :: [Plugin]
+loadPlugins = [Mgnl.plugin]
+
+-- if plugin:
+{-
 import Data.List (isInfixOf, isPrefixOf)
 import GHC
 import GHC.Paths
@@ -61,15 +68,11 @@ loadPlugin pluginName = do
       let value' = (unsafeCoerce value) :: Plugin
       return value'
 
-#else
-
-loadPlugin :: FilePath -> IO Plugin
-loadPlugin pluginName = do
-  error $ "Cannot load plugin '" ++ pluginName ++
-          "'. gitit was not compiled with plugin support."
-  return undefined
-
-#endif
+-- loadPlugin :: FilePath -> IO Plugin
+-- loadPlugin pluginName = do
+--   error $ "Cannot load plugin '" ++ pluginName ++
+--           "'. gitit was not compiled with plugin support."
+--   return undefined
 
 loadPlugins :: [FilePath] -> IO [Plugin]
 loadPlugins pluginNames = do
@@ -77,3 +80,4 @@ loadPlugins pluginNames = do
   unless (null pluginNames) $ logM "gitit" WARNING "Finished loading plugins."
   return plugins'
 
+-}

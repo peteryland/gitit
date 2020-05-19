@@ -35,11 +35,8 @@ import System.Exit
 import System.IO (stderr)
 import System.Console.GetOpt
 import Network.Socket hiding (Debug)
-import Data.Version (showVersion)
 import qualified Data.ByteString.Char8 as B
 import Data.ByteString.UTF8 (fromString)
-
-import Paths_gitit (version, getDataFileName)
 
 main :: IO ()
 main = do
@@ -52,10 +49,8 @@ main = do
     Left Help -> putErr ExitSuccess =<< usageMessage
     Left Version -> do
         progname <- getProgName
-        putErr ExitSuccess (progname ++ " version " ++
-            showVersion version ++ compileInfo ++ copyrightMessage)
-    Left PrintDefaultConfig -> getDataFileName "data/default.conf" >>=
-        readFileUTF8 >>= B.putStrLn . encodeUtf8 >> exitSuccess
+        putErr ExitSuccess (progname ++ " version " ++ "0.13.0.1-mgnl-1" ++ compileInfo ++ copyrightMessage)
+    Left PrintDefaultConfig -> readFileUTF8 "/usr/share/gitit/data/default.conf" >>= B.putStrLn . encodeUtf8 >> exitSuccess
     Right xs -> return xs
 
   conf' <- case [f | ConfigFile f <- opts] of
@@ -83,9 +78,9 @@ main = do
   saveGlobalLogger $ setLevel level $ setHandlers [logFileHandler] gititLogger
 
   -- setup the page repository, template, and static files, if they don't exist
-  createRepoIfMissing conf
-  createStaticIfMissing conf
-  createTemplateIfMissing conf
+--   createRepoIfMissing conf
+--   createStaticIfMissing conf
+--   createTemplateIfMissing conf
 
   -- initialize state
   initializeGititState conf
@@ -157,12 +152,7 @@ copyrightMessage = "\nCopyright (C) 2008 John MacFarlane\n" ++
                    "warranty, not even for merchantability or fitness for a particular purpose."
 
 compileInfo :: String
-compileInfo =
-#ifdef _PLUGINS
-  " +plugins"
-#else
-  " -plugins"
-#endif
+compileInfo = " +plugins"
 
 handleFlag :: Config -> ConfigOpt -> Config
 handleFlag conf Debug = conf{ debugMode = True, logLevel = DEBUG }

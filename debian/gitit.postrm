@@ -1,0 +1,16 @@
+#!/bin/sh
+
+#DEBHELPER#
+
+if [ "$1" = remove ]; then
+  rm -rf /var/lib/mgnl-doc/cache /var/log/mgnl-doc.log
+fi
+
+if [ "$1" = purge ]; then
+  a2dissite -q mgnldoc
+  systemctl reload apache2
+  rm -rf /var/lib/mgnl-doc /var/log/mgnl-doc.log
+  deluser --quiet --system mgnldoc
+fi
+
+exit 0

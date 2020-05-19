@@ -19,13 +19,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Network.Gitit.Framework (
                                -- * Combinators for dealing with users
-                                 withUserFromSession
-                               , withUserFromHTTPAuth
-                               , authenticateUserThat
-                               , authenticate
-                               , getLoggedInUser
+--                                  withUserFromSession
+--                                , withUserFromHTTPAuth
+--                                , authenticateUserThat
+--                                , authenticate
+--                                , getLoggedInUser
                                -- * Combinators to exclude certain actions
-                               , unlessNoEdit
+                               unlessNoEdit
                                , unlessNoDelete
                                -- * Guards for routing
                                , guardCommand
@@ -69,90 +69,90 @@ import Skylighting (syntaxesByFilename, defaultSyntaxMap)
 import Data.Maybe (fromJust, fromMaybe)
 import Data.List (intercalate, isPrefixOf, isInfixOf)
 import System.FilePath ((<.>), takeExtension, takeFileName)
-import Text.ParserCombinators.Parsec
+-- import Text.ParserCombinators.Parsec
 import Network.URL (decString, encString)
 import Network.URI (isUnescapedInURI)
-import Data.ByteString.Base64 (decodeLenient)
-import Network.HTTP (urlEncodeVars)
+-- import Data.ByteString.Base64 (decodeLenient)
+-- import Network.HTTP (urlEncodeVars)
 
 -- | Require a logged in user if the authentication level demands it.
 -- Run the handler if a user is logged in, otherwise redirect
 -- to login page.
-authenticate :: AuthenticationLevel -> Handler -> Handler
-authenticate = authenticateUserThat (const True)
+-- authenticate :: AuthenticationLevel -> Handler -> Handler
+-- authenticate = authenticateUserThat (const True)
 
 -- | Like 'authenticate', but with a predicate that the user must satisfy.
-authenticateUserThat :: (User -> Bool) -> AuthenticationLevel -> Handler -> Handler
-authenticateUserThat predicate level handler = do
-  cfg <- getConfig
-  if level <= requireAuthentication cfg
-     then do
-       mbUser <- getLoggedInUser
-       rq <- askRq
-       let url = rqUri rq ++ rqQuery rq
-       case mbUser of
-            Nothing   -> tempRedirect ("/_login?" ++ urlEncodeVars [("destination", url)]) $ toResponse ()
-            Just u    -> if predicate u
-                            then handler
-                            else error "Not authorized."
-     else handler
+-- authenticateUserThat :: (User -> Bool) -> AuthenticationLevel -> Handler -> Handler
+-- authenticateUserThat predicate level handler = do
+--   cfg <- getConfig
+--   if level <= requireAuthentication cfg
+--      then do
+--        mbUser <- getLoggedInUser
+--        rq <- askRq
+--        let url = rqUri rq ++ rqQuery rq
+--        case mbUser of
+--             Nothing   -> tempRedirect ("/_login?" ++ urlEncodeVars [("destination", url)]) $ toResponse ()
+--             Just u    -> if predicate u
+--                             then handler
+--                             else error "Not authorized."
+--      else handler
 
 -- | Run the handler after setting @REMOTE_USER@ with the user from
 -- the session.
-withUserFromSession :: Handler -> Handler
-withUserFromSession handler = withData $ \(sk :: Maybe SessionKey) -> do
-  mbSd <- maybe (return Nothing) getSession sk
-  cfg <- getConfig
-  mbUser <- case mbSd of
-            Nothing    -> return Nothing
-            Just sd    -> do
-              addCookie (MaxAge $ sessionTimeout cfg) (mkCookie "sid" (show $ fromJust sk))  -- refresh timeout
-              case sessionUser sd of
-                Nothing -> return Nothing
-                Just user -> getUser user
-  let user = maybe "" uUsername mbUser
-  localRq (setHeader "REMOTE_USER" user) handler
+-- withUserFromSession :: Handler -> Handler
+-- withUserFromSession handler = withData $ \(sk :: Maybe SessionKey) -> do
+--   mbSd <- maybe (return Nothing) getSession sk
+--   cfg <- getConfig
+--   mbUser <- case mbSd of
+--             Nothing    -> return Nothing
+--             Just sd    -> do
+--               addCookie (MaxAge $ sessionTimeout cfg) (mkCookie "sid" (show $ fromJust sk))  -- refresh timeout
+--               case sessionUser sd of
+--                 Nothing -> return Nothing
+--                 Just user -> getUser user
+--   let user = maybe "" uUsername mbUser
+--   localRq (setHeader "REMOTE_USER" user) handler
 
 -- | Run the handler after setting @REMOTE_USER@ from the "authorization"
 -- header.  Works with simple HTTP authentication or digest authentication.
-withUserFromHTTPAuth :: Handler -> Handler
-withUserFromHTTPAuth handler = do
-  req <- askRq
-  let user = case getHeader "authorization" req of
-              Nothing         -> ""
-              Just authHeader -> case parse pAuthorizationHeader "" (UTF8.toString authHeader) of
-                                  Left _  -> ""
-                                  Right u -> u
-  localRq (setHeader "REMOTE_USER" user) handler
+-- withUserFromHTTPAuth :: Handler -> Handler
+-- withUserFromHTTPAuth handler = do
+--   req <- askRq
+--   let user = case getHeader "authorization" req of
+--               Nothing         -> ""
+--               Just authHeader -> case parse pAuthorizationHeader "" (UTF8.toString authHeader) of
+--                                   Left _  -> ""
+--                                   Right u -> u
+--   localRq (setHeader "REMOTE_USER" user) handler
 
 -- | Returns @Just@ logged in user or @Nothing@.
-getLoggedInUser :: GititServerPart (Maybe User)
-getLoggedInUser = do
-  req <- askRq
-  case maybe "" UTF8.toString (getHeader "REMOTE_USER" req) of
-        "" -> return Nothing
-        u  -> do
-          mbUser <- getUser u
-          case mbUser of
-               Just user -> return $ Just user
-               Nothing   -> return $ Just User{uUsername = u, uEmail = "", uPassword = undefined}
+-- getLoggedInUser :: GititServerPart (Maybe User)
+-- getLoggedInUser = do
+--   req <- askRq
+--   case maybe "" UTF8.toString (getHeader "REMOTE_USER" req) of
+--         "" -> return Nothing
+--         u  -> do
+--           mbUser <- getUser u
+--           case mbUser of
+--                Just user -> return $ Just user
+--                Nothing   -> return $ Just User{uUsername = u, uEmail = "", uPassword = undefined}
 
-pAuthorizationHeader :: GenParser Char st String
-pAuthorizationHeader = try pBasicHeader <|> pDigestHeader
+-- pAuthorizationHeader :: GenParser Char st String
+-- pAuthorizationHeader = try pBasicHeader <|> pDigestHeader
 
-pDigestHeader :: GenParser Char st String
-pDigestHeader = do
-  _ <- string "Digest username=\""
-  result' <- many (noneOf "\"")
-  _ <- char '"'
-  return result'
+-- pDigestHeader :: GenParser Char st String
+-- pDigestHeader = do
+--   _ <- string "Digest username=\""
+--   result' <- many (noneOf "\"")
+--   _ <- char '"'
+--   return result'
 
-pBasicHeader :: GenParser Char st String
-pBasicHeader = do
-  _ <- string "Basic "
-  result' <- many (noneOf " \t\n")
-  return $ takeWhile (/=':') $ UTF8.toString
-         $ decodeLenient $ UTF8.fromString result'
+-- pBasicHeader :: GenParser Char st String
+-- pBasicHeader = do
+--   _ <- string "Basic "
+--   result' <- many (noneOf " \t\n")
+--   return $ takeWhile (/=':') $ UTF8.toString
+--          $ decodeLenient $ UTF8.fromString result'
 
 -- | @unlessNoEdit responder fallback@ runs @responder@ unless the
 -- page has been designated not editable in configuration; in that
@@ -253,8 +253,8 @@ uriPath = unwords . words . drop 1 . takeWhile (/='?')
 
 isPage :: String -> Bool
 isPage "" = False
-isPage ('_':_) = False
-isPage s = all (`notElem` "*?") s && not (".." `isInfixOf` s) && not ("/_" `isInfixOf` s)
+-- isPage ('_':_) = False
+isPage s = all (`notElem` "*?") s && not (".." `isInfixOf` s) -- && not ("/_" `isInfixOf` s)
 -- for now, we disallow @*@ and @?@ in page names, because git filestore
 -- does not deal with them properly, and darcs filestore disallows them.
 
@@ -285,7 +285,7 @@ isSourceCode path' =
 -- | Returns encoded URL path for the page with the given name, relative to
 -- the wiki base.
 urlForPage :: String -> String
-urlForPage page = '/' : encString False isUnescapedInURI page
+urlForPage page = '/' : encString True isUnescapedInURI page
 
 -- | Returns the filestore path of the file containing the page's source.
 pathForPage :: String -> String -> FilePath

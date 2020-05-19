@@ -1,0 +1,5 @@
+/usr/bin/* usr/bin
+/usr/share/gitit/data/* usr/share/gitit/data
+/var/lib/mgnl-doc/* var/lib/mgnl-doc
+/etc/gitit.conf etc
+/etc/apache2/sites-available/mgnldoc.conf etc/apache2/sites-available

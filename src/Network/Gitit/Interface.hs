@@ -107,12 +107,12 @@ module Network.Gitit.Interface ( Plugin(..)
                                , mkPageTransformM
                                , Config(..)
                                , Request(..)
-                               , User(..)
+--                                , User(..)
                                , Context(..)
                                , PageType(..)
                                , PageLayout(..)
                                , askConfig
-                               , askUser
+--                                , askUser
                                , askRequest
                                , askFileStore
                                , askMeta
@@ -144,8 +144,8 @@ askConfig :: PluginM Config
 askConfig = liftM pluginConfig ask
 
 -- | Returns @Just@ the logged in user, or @Nothing@ if nobody is logged in.
-askUser :: PluginM (Maybe User)
-askUser = liftM pluginUser ask
+-- askUser :: PluginM (Maybe User)
+-- askUser = liftM pluginUser ask
 
 -- | Returns the complete HTTP request.
 askRequest :: PluginM Request

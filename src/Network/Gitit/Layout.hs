@@ -41,6 +41,7 @@ import Data.Maybe (isNothing, isJust, fromJust)
 defaultPageLayout :: PageLayout
 defaultPageLayout = PageLayout
   { pgPageName       = ""
+  , pgFileName       = ""
   , pgRevision       = Nothing
   , pgPrintable      = False
   , pgMessages       = []
@@ -51,7 +52,7 @@ defaultPageLayout = PageLayout
   , pgMarkupHelp     = Nothing
   , pgTabs           = [ViewTab, EditTab, HistoryTab, DiscussTab]
   , pgSelectedTab    = ViewTab
-  , pgLinkToFeed     = False
+--   , pgLinkToFeed     = False
   }
 
 -- | Returns formatted page
@@ -74,6 +75,7 @@ filledPageTemplate :: String -> Config -> PageLayout -> Html ->
 filledPageTemplate base' cfg layout htmlContents templ =
   let rev  = pgRevision layout
       page = pgPageName layout
+      fileName = pgFileName layout
       prefixedScript x = case x of
                            'h':'t':'t':'p':_  -> x
                            _                  -> base' ++ "/js/" ++ x
@@ -93,10 +95,13 @@ filledPageTemplate base' cfg layout htmlContents templ =
       setStrAttr  attr = T.setAttribute attr . stringToHtmlString
       setBoolAttr attr test = if test then T.setAttribute attr "true" else id
   in               T.setAttribute "base" base' .
-                   T.setAttribute "feed" (pgLinkToFeed layout) .
+--                    T.setAttribute "feed" (pgLinkToFeed layout) .
                    setStrAttr "wikititle" (wikiTitle cfg) .
                    setStrAttr "pagetitle" (pgTitle layout) .
                    T.setAttribute "javascripts" javascriptlinks .
+                   T.setAttribute "crumbs" (splitPath page) .
+                   T.setAttribute "crumblinks" (pathCrumbs page) .
+                   setStrAttr "filename" fileName .
                    setStrAttr "pagename" page .
                    setStrAttr "articlename" article .
                    setStrAttr "discussionname" discussion .
@@ -120,6 +125,19 @@ filledPageTemplate base' cfg layout htmlContents templ =
                    T.setAttribute "content" (renderHtmlFragment htmlContents) .
                    setBoolAttr "wikiupload" ( uploadsAllowed cfg) $
                    templ
+  where
+    pathCrumbs = mkCrumbs "" . splitPath
+    mkCrumbs _ [] = ""
+    mkCrumbs _ [s] = "<span class=\"crumbpage\">" ++ s ++ "</span>"
+    mkCrumbs s0 (s:ss) = let s1 = s0 ++ "/" ++ (replace ' ' '+' s)
+                         in "<a class=\"crumblink\" href=\"" ++ s1 ++ "\">" ++ s ++ "</a><span class=\"crumbsep\"></span>" ++ mkCrumbs s1 ss
+    splitPath s = case dropWhile (=='/') s of
+                    "" -> []
+                    s' -> let (w, s'') = break (=='/') s'
+                          in w : splitPath s''
+    replace _ _ [] = []
+    replace a b (x:xs) | x == a = b:replace a b xs
+    replace a b (x:xs) = x:replace a b xs
 
 
 exportBox :: String -> Config -> String -> Maybe String -> Html

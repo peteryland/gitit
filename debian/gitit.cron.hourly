@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ "$USER" != mgnldoc ]; then
+  exec sudo -u mgnldoc "$0" "$@"
+fi
+
+ref=master
+dir=/var/lib/mgnl-doc/repo
+
+/usr/bin/git --work-tree="$dir" --git-dir="$dir"/.git fetch -q
+/usr/bin/git --work-tree="$dir" --git-dir="$dir"/.git reset --hard -q origin/"$ref"

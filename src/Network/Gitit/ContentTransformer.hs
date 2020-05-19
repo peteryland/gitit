@@ -122,14 +122,16 @@ runPageTransformer :: ToMessage a
 runPageTransformer xform = withData $ \params -> do
   page <- getPage
   cfg <- getConfig
-  evalStateT xform  Context{ ctxFile = pathForPage page (defaultExtension cfg)
+  let fileName = pathForPage page (defaultExtension cfg)
+  evalStateT xform  Context{ ctxFile = fileName
                            , ctxLayout = defaultPageLayout{
                                              pgPageName = page
+                                           , pgFileName = fileName
                                            , pgTitle = page
                                            , pgPrintable = pPrintable params
                                            , pgMessages = pMessages params
-                                           , pgRevision = pRevision params
-                                           , pgLinkToFeed = useFeed cfg }
+                                           , pgRevision = pRevision params }
+--                                            , pgLinkToFeed = useFeed cfg }
                            , ctxCacheable = True
                            , ctxTOC = tableOfContents cfg
                            , ctxBirdTracks = showLHSBirdTracks cfg
@@ -145,11 +147,12 @@ runFileTransformer xform = withData $ \params -> do
   evalStateT xform  Context{ ctxFile = id page
                            , ctxLayout = defaultPageLayout{
                                              pgPageName = page
+                                           , pgFileName = page
                                            , pgTitle = page
                                            , pgPrintable = pPrintable params
                                            , pgMessages = pMessages params
-                                           , pgRevision = pRevision params
-                                           , pgLinkToFeed = useFeed cfg }
+                                           , pgRevision = pRevision params }
+--                                            , pgLinkToFeed = useFeed cfg }
                            , ctxCacheable = True
                            , ctxTOC = tableOfContents cfg
                            , ctxBirdTracks = showLHSBirdTracks cfg
@@ -598,11 +601,11 @@ applyTransform :: a -> (a -> PluginM a) -> ContentTransformer a
 applyTransform inp transform = do
   context <- get
   conf <- lift getConfig
-  user <- lift getLoggedInUser
+--   user <- lift getLoggedInUser
   fs <- lift getFileStore
   req <- lift askRq
   let pluginData = PluginData{ pluginConfig = conf
-                             , pluginUser = user
+--                              , pluginUser = user
                              , pluginRequest = req
                              , pluginFileStore = fs }
   (result', context') <- liftIO $ runPluginM (transform inp) pluginData context

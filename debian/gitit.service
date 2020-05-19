@@ -1,0 +1,11 @@
+[Unit]
+Description=Magnolia Documentation Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/gitit
+Restart=always
+User=mgnldoc
+
+[Install]
+WantedBy=multi-user.target

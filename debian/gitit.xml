@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+
+  <!ENTITY dhfirstname "Giovanni">
+  <!ENTITY dhsurname   "Mascellani">
+  <!ENTITY dhusername  "Giovanni Mascellani">
+  <!ENTITY dhemail     "gio@debian.org">
+  <!ENTITY dhsection   "1">
+  <!ENTITY dhtitle     "Gitit User Manual">
+  <!ENTITY dhucpackage "gitit">
+  <!ENTITY dhpackage   "gitit">
+]>
+
+<refentry>
+  <refentryinfo>
+    <title>&dhtitle;</title>
+    <productname>&dhpackage;</productname>
+    <authorgroup>
+      <author>
+       <firstname>&dhfirstname;</firstname>
+        <surname>&dhsurname;</surname>
+        <contrib>Wrote this manpage for the Debian system.</contrib>
+        <address>
+          <email>&dhemail;</email>
+        </address>
+      </author>
+    </authorgroup>
+    <copyright>
+      <year>2011</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+    <legalnotice>
+      <para>This manual page was written for the Debian system
+        (and may be used by others).</para>
+      <para>Permission is granted to copy, distribute and/or modify this
+        document under the terms of the GNU General Public License,
+        Version 3 or (at your option) any later version published by
+        the Free Software Foundation.</para>
+      <para>On Debian systems, the complete text of the GNU General Public
+        License can be found in
+        <filename>/usr/share/common-licenses/GPL</filename>.</para>
+    </legalnotice>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>&dhucpackage;</refentrytitle>
+    <manvolnum>&dhsection;</manvolnum>
+  </refmeta>
+  <refnamediv>
+    <refname>&dhpackage;</refname>
+    <refpurpose>wiki engine backed by a git or darcs filestore</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+      <arg choice="opt">
+        <group choice="req">
+          <arg choice="plain"><option>-h</option></arg>
+          <arg choice="plain"><option>--help</option></arg>
+        </group>
+      </arg>
+
+      <arg choice="opt">
+        <group choice="req">
+          <arg choice="plain"><option>-v</option></arg>
+          <arg choice="plain"><option>--version</option></arg>
+        </group>
+      </arg>
+
+      <arg choice="opt">
+        <group choice="req">
+          <arg choice="plain"><option>-p <replaceable>port</replaceable></option></arg>
+          <arg choice="plain"><option>--port=<replaceable>port</replaceable></option></arg>
+        </group>
+      </arg>
+
+      <arg choice="opt">
+        <group choice="req">
+          <arg choice="plain"><option>-l <replaceable>interface</replaceable></option></arg>
+          <arg choice="plain"><option>--listen=<replaceable>interface</replaceable></option></arg>
+        </group>
+      </arg>
+
+      <arg choice="opt">
+        <group choice="req">
+          <arg choice="plain"><option>-f <replaceable>configfile</replaceable></option></arg>
+          <arg choice="plain"><option>--config-file=<replaceable>configfile</replaceable></option></arg>
+        </group>
+      </arg>
+
+      <arg choice="opt">
+        <arg choice="plain"><option>--debug</option></arg>
+      </arg>
+
+      <arg choice="opt">
+        <arg choice="plain"><option>--print-default-config</option></arg>
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1 id="description">
+    <title>DESCRIPTION</title>
+    <para><command>&dhpackage;</command> is a wiki enging backed by a git or darcs
+      filestore. When run for the first time, it creates a file standard files
+      and directories that contains the structure of a basic wiki, then listens
+      for incoming HTTP connections. When run in a directory that already
+      contains a gitit wiki, it uses the information already present.</para>
+    <para>The directory <command>wikidata</command> contains the repository
+      that hosts the pages in the wiki. You can change its content both from
+      the Web interface and by modifying directly the repository (via
+      commit/record or push/pull).</para>
+  </refsect1>
+  <refsect1 id="options">
+    <title>OPTIONS</title>
+    <para>The program follows the usual GNU command line syntax,
+      with long options starting with two dashes (`-').</para>
+    <variablelist>
+
+      <varlistentry>
+        <term><option>-h</option></term>
+        <term><option>--help</option></term>
+        <listitem>
+          <para>Displays a brief help about the parameters, then quits.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-v</option></term>
+        <term><option>--version</option></term>
+        <listitem>
+          <para>Displays the installed version of &dhpackage;, then quits.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-p <replaceable>port</replaceable></option></term>
+        <term><option>--port=<replaceable>port</replaceable></option></term>
+        <listitem>
+          <para>Intruct &dhpackage; to listen on the specified port.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-l <replaceable>interface</replaceable></option></term>
+        <term><option>--listen=<replaceable>interface</replaceable></option></term>
+        <listitem>
+          <para>Intruct &dhpackage; to listen on the specified interface.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-f <replaceable>configfile</replaceable></option></term>
+        <term><option>--config-file=<replaceable>configfile</replaceable></option></term>
+        <listitem>
+          <para>Override default configuration with the values specified in
+          file <replaceable>configfile</replaceable>. To see this file's syntax
+          and the configurable fields (with default values and documentation),
+          use <option>--print-default-config</option>.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--debug</option></term>
+        <listitem>
+          <para>Enable debug mode: &dhpackage; will print information about all
+          the requests it handles.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--print-default-config</option></term>
+        <listitem>
+          <para>Prints the default configuration values, along with some
+          documentation.</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+  </refsect1>
+</refentry>

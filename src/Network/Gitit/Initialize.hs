@@ -31,17 +31,16 @@ import Data.Semigroup ((<>))
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.FileStore
-import qualified Data.Map as M
+-- import qualified Data.Map as M
 import Network.Gitit.Util (readFileUTF8)
 import Network.Gitit.Types
 import Network.Gitit.State
 import Network.Gitit.Framework
 import Network.Gitit.Plugins
 import Network.Gitit.Layout (defaultRenderPage)
-import Paths_gitit (getDataFileName)
 import Control.Exception (throwIO, try)
-import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, doesFileExist)
-import Control.Monad ((<=<), unless, forM_, liftM)
+import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist) -- , doesFileExist)
+import Control.Monad ((<=<), unless, forM_) --, liftM)
 import Text.Pandoc hiding (getDataFileName, WARNING)
 import System.Log.Logger (logM, Priority(..))
 import qualified Text.StringTemplate as ST
@@ -50,22 +49,20 @@ import qualified Text.StringTemplate as ST
 -- | Initialize Gitit State.
 initializeGititState :: Config -> IO ()
 initializeGititState conf = do
-  let userFile' = userFile conf
-      pluginModules' = pluginModules conf
-  plugins' <- loadPlugins pluginModules'
+--   let userFile' = userFile conf
 
-  userFileExists <- doesFileExist userFile'
-  users' <- if userFileExists
-               then liftM (M.fromList . read . T.unpack) $ readFileUTF8 userFile'
-               else return M.empty
+--   userFileExists <- doesFileExist userFile'
+--   users' <- if userFileExists
+--                then liftM (M.fromList . read . T.unpack) $ readFileUTF8 userFile'
+--                else return M.empty
 
   templ <- compilePageTemplate (templatesDir conf)
 
-  updateGititState $ \s -> s { sessions      = Sessions M.empty
-                             , users         = users'
-                             , templatesPath = templatesDir conf
+  updateGititState $ \s -> s { -- sessions      = Sessions M.empty
+--                              , users         = users'
+                             templatesPath = templatesDir conf
                              , renderPage    = defaultRenderPage templ
-                             , plugins       = plugins' }
+                             , plugins       = loadPlugins }
 
 -- | Recompile the page template.
 recompilePageTemplate :: IO ()
@@ -77,7 +74,7 @@ recompilePageTemplate = do
 --- | Compile a master page template named @page.st@ in the directory specified.
 compilePageTemplate :: FilePath -> IO (ST.StringTemplate String)
 compilePageTemplate tempsDir = do
-  defaultGroup <- getDataFileName ("data" </> "templates") >>= ST.directoryGroup
+  defaultGroup <- ST.directoryGroup $ "/usr/share/gitit/data" </> "templates"
   customExists <- doesDirectoryExist tempsDir
   combinedGroup <-
     if customExists
@@ -85,7 +82,7 @@ compilePageTemplate tempsDir = do
        -- by templates from the user's template dir
        then do customGroup <- ST.directoryGroup tempsDir
                return $ ST.mergeSTGroups customGroup defaultGroup
-       else do logM "gitit" WARNING $ "Custom template directory not found"
+       else do logM "gitit" DEBUG $ "Custom template directory not found"
                return defaultGroup
   case ST.getStringTemplate "page" combinedGroup of
         Just t    -> return t
@@ -97,7 +94,7 @@ createTemplateIfMissing conf' = do
   templateExists <- doesDirectoryExist (templatesDir conf')
   unless templateExists $ do
     createDirectoryIfMissing True (templatesDir conf')
-    templatePath <- getDataFileName $ "data" </> "templates"
+    let templatePath = "/usr/share/gitit/data" </> "templates"
     -- templs <- liftM (filter (`notElem` [".",".."])) $
     --  getDirectoryContents templatePath
     -- Copy footer.st, since this is the component users
@@ -142,14 +139,14 @@ createDefaultPages conf = do
                        MediaWiki  -> writeMediaWiki defOpts <=< toPandoc
                        CommonMark -> writeCommonMark defOpts <=< toPandoc
 
-    welcomepath <- getDataFileName $ "data" </> "FrontPage" <.> "page"
+    let welcomepath = "/usr/share/gitit/data" </> "FrontPage" <.> "page"
     welcomecontents <- converter =<< readFileUTF8 welcomepath
-    helppath <- getDataFileName $ "data" </> "Help" <.> "page"
+    let helppath = "/usr/share/gitit/data" </> "Help" <.> "page"
     helpcontentsInitial <- converter =<< readFileUTF8 helppath
-    markuppath <- getDataFileName $ "data" </> "markup" <.> show pt
+    let markuppath = "/usr/share/gitit/data" </> "markup" <.> show pt
     helpcontentsMarkup <- converter =<< readFileUTF8 markuppath
     let helpcontents = helpcontentsInitial <> "\n\n" <> helpcontentsMarkup
-    usersguidepath <- getDataFileName "README.markdown"
+    let usersguidepath = "/usr/share/gitit/README.markdown"
     usersguidecontents <- converter =<< readFileUTF8 usersguidepath
     -- include header in case user changes default format:
     let header = "---\nformat: " <>
@@ -181,7 +178,7 @@ createStaticIfMissing conf = do
 
     let cssdir = staticdir </> "css"
     createDirectoryIfMissing True cssdir
-    cssDataDir <- getDataFileName $ "data" </> "static" </> "css"
+    let cssDataDir = "/usr/share/gitit/data" </> "static" </> "css"
     -- cssFiles <- liftM (filter (\f -> takeExtension f == ".css")) $ getDirectoryContents cssDataDir
     forM_ ["custom.css"] $ \f -> do
       copyFile (cssDataDir </> f) (cssdir </> f)
@@ -190,14 +187,14 @@ createStaticIfMissing conf = do
     {-
     let icondir = staticdir </> "img" </> "icons"
     createDirectoryIfMissing True icondir
-    iconDataDir <- getDataFileName $ "data" </> "static" </> "img" </> "icons"
+    let iconDataDir = "/usr/share/gitit/data" </> "static" </> "img" </> "icons"
     iconFiles <- liftM (filter (\f -> takeExtension f == ".png")) $ getDirectoryContents iconDataDir
     forM_ iconFiles $ \f -> do
       copyFile (iconDataDir </> f) (icondir </> f)
       logM "gitit" WARNING $ "Created " ++ (icondir </> f)
     -}
 
-    logopath <- getDataFileName $ "data" </> "static" </> "img" </> "logo.png"
+    let logopath = "/usr/share/gitit/data" </> "static" </> "img" </> "logo.png"
     createDirectoryIfMissing True $ staticdir </> "img"
     copyFile logopath $ staticdir </> "img" </> "logo.png"
     logM "gitit" WARNING $ "Created " ++ (staticdir </> "img" </> "logo.png")
@@ -205,7 +202,7 @@ createStaticIfMissing conf = do
     {-
     let jsdir = staticdir </> "js"
     createDirectoryIfMissing True jsdir
-    jsDataDir <- getDataFileName $ "data" </> "static" </> "js"
+    let jsDataDir = "/usr/share/gitit/data" </> "static" </> "js"
     javascripts <- liftM (filter (`notElem` [".", ".."])) $ getDirectoryContents jsDataDir
     forM_ javascripts $ \f -> do
       copyFile (jsDataDir </> f) (jsdir </> f)

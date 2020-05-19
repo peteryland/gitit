@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ "$1" = "configure" ]; then
+  adduser --quiet --system --home /var/lib/mgnl-doc --no-create-home mgnldoc
+
+  if [ ! -d /var/lib/mgnl-doc/repo/.git ]; then
+    git clone https://git.magnolia-cms.com/scm/~pdr/docu.git /var/lib/mgnl-doc/repo
+  fi
+
+  touch /var/log/mgnl-doc.log
+  chown -R mgnldoc:nogroup /var/lib/mgnl-doc /var/log/mgnl-doc.log
+
+  a2enmod -q headers
+  a2enmod -q proxy_http
+  a2enmod -q rewrite
+  a2ensite -q mgnldoc
+  systemctl reload apache2
+fi
+
+#DEBHELPER#
+
+exit 0

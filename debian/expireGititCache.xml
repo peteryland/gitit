@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+
+  <!ENTITY dhfirstname "Giovanni">
+  <!ENTITY dhsurname   "Mascellani">
+  <!ENTITY dhusername  "Giovanni Mascellani">
+  <!ENTITY dhemail     "gio@debian.org">
+  <!ENTITY dhsection   "1">
+  <!ENTITY dhtitle     "Gitit User Manual">
+  <!ENTITY dhucpackage "expireGititCache">
+  <!ENTITY dhpackage   "expireGititCache">
+]>
+
+<refentry>
+  <refentryinfo>
+    <title>&dhtitle;</title>
+    <productname>&dhpackage;</productname>
+    <authorgroup>
+      <author>
+       <firstname>&dhfirstname;</firstname>
+        <surname>&dhsurname;</surname>
+        <contrib>Wrote this manpage for the Debian system.</contrib>
+        <address>
+          <email>&dhemail;</email>
+        </address>
+      </author>
+    </authorgroup>
+    <copyright>
+      <year>2011</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+    <legalnotice>
+      <para>This manual page was written for the Debian system
+        (and may be used by others).</para>
+      <para>Permission is granted to copy, distribute and/or modify this
+        document under the terms of the GNU General Public License,
+        Version 3 or (at your option) any later version published by
+        the Free Software Foundation.</para>
+      <para>On Debian systems, the complete text of the GNU General Public
+        License can be found in
+        <filename>/usr/share/common-licenses/GPL</filename>.</para>
+    </legalnotice>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>&dhucpackage;</refentrytitle>
+    <manvolnum>&dhsection;</manvolnum>
+  </refmeta>
+  <refnamediv>
+    <refname>&dhpackage;</refname>
+    <refpurpose>requests cache expiration for gitit pages</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+      <arg choice="plain"><replaceable>gititUrl</replaceable></arg>
+      <arg choice="plain"><replaceable>page1</replaceable></arg>
+      <arg choice="opt"><replaceable>page2</replaceable> <replaceable>...</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1 id="description">
+    <title>DESCRIPTION</title>
+    <para><command>&dhpackage;</command> requests to a <command>gitit</command>-powered
+    wiki to expire the cache for specified pages. For example, is <replaceable>gititUrl</replaceable>
+    is set to "http://localhost:5001" and <replaceable>page1</replaceable> is
+    "Main page.page", then <command>&dhpackage;</command> execute a POST request
+    to the URL "http://localhost:5001/_expire/Front page".</para>
+  </refsect1>
+
+  <refsect1 id="returns">
+    <title>RETURNS</title>
+    <para><command>&dhpackage;</command>'s return status is:
+    <itemizedlist>
+    <listitem><simpara><command>0</command> if the pages' caches were successfully expired
+      or if pages weren't cached in the first place);</simpara></listitem>
+    <listitem><simpara><command>1</command> if fewer than two arguments were
+      supplied;</simpara></listitem>
+    <listitem><simpara><command>3</command> if the wiki engine responded with something
+      different from 200 OK to the request;</simpara></listitem>
+    <listitem><simpara><command>5</command> if <replaceable>gititUrl</replaceable> could
+      not be parsed.</simpara></listitem>
+    </itemizedlist>
+    </para>
+  </refsect1>
+
+</refentry>

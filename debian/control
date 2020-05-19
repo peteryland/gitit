@@ -1,0 +1,53 @@
+Source: gitit
+Maintainer: Debian Haskell Group <pkg-haskell-maintainers@lists.alioth.debian.org>
+Uploaders:
+ Giovanni Mascellani <gio@debian.org>,
+ Clint Adams <clint@debian.org>,
+ Louis Bettens <louis@bettens.info>,
+ Anthony Towns <ajt@debian.org>,
+ Dmitry Bogatov <KAction@gnu.org>,
+Priority: optional
+Section: haskell
+Rules-Requires-Root: no
+Build-Depends: dh-systemd
+Standards-Version: 4.3.0
+Homepage: http://gitit.net
+Vcs-Browser: https://salsa.debian.org/haskell-team/DHG_packages/tree/master/p/gitit
+Vcs-Git: https://salsa.debian.org/haskell-team/DHG_packages.git [p/gitit]
+X-Description: Wiki engine backed by a git or darcs filestore
+ Gitit is a wiki backed by a git or darcs filestore. Pages and uploaded files
+ can be modified either directly via the VCS's command-line tools or through
+ the wiki's web interface. Pandoc is used for markup processing, so pages may
+ be written in (extended) markdown, reStructuredText, LaTeX, HTML, or literate
+ Haskell, and exported in ten different formats, including LaTeX, ConTeXt,
+ DocBook, RTF, OpenOffice ODT, and MediaWiki markup.
+ .
+ Other features include
+   * plugins: dynamically loaded page transformations written in Haskell;
+   * categories;
+   * support for Unicode;
+   * TeX math using texmath;
+   * syntax highlighting of source code files and code snippets using
+     highlighting-kate;
+   * wiki pages can be viewed as slide shows;
+   * caching;
+   * Atom feeds (site-wide and per-page);
+   * a library, Network.Gitit, that makes it simple to include a gitit wiki in
+     any happstack application;
+   * pages can be written directly in literate Haskell.
+
+Package: gitit
+Architecture: any
+Section: web
+Conflicts:
+ libghc-gitit-data
+Depends:
+ git,
+ ${misc:Depends},
+ ${shlibs:Depends},
+ mime-support,
+ libghc-filestore-data
+Description: Custom Gitit for Magnolia Documentation
+ This is a customised install of gitit for serving Magnolia Documentation.
+ .
+ As it is intended for internal use only, Magnolia provides no warranties nor support for this package.
