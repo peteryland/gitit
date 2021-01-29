@@ -42,7 +42,7 @@ Section: web
 Conflicts:
  libghc-gitit-data
 Depends:
- git,
+ git, apache2,
  ${misc:Depends},
  ${shlibs:Depends},
  mime-support,

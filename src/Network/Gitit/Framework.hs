@@ -289,6 +289,7 @@ urlForPage page = '/' : encString True isUnescapedInURI page
 
 -- | Returns the filestore path of the file containing the page's source.
 pathForPage :: String -> String -> FilePath
+pathForPage ""   ext = "index" <.> ext
 pathForPage page ext = page <.> ext
 
 -- | Retrieves a mime type based on file extension.

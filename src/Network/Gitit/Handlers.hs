@@ -29,6 +29,7 @@ module Network.Gitit.Handlers (
 --                       , showActivity
                       , goToPage
                       , searchResults
+                      , notFoundPage
 --                       , uploadForm
 --                       , uploadFile
                       , indexPage
@@ -64,7 +65,7 @@ import Network.Gitit.Util (orIfNull)
 import Network.Gitit.Cache (expireCachedFile, lookupCache, cacheContents)
 import Network.Gitit.ContentTransformer (showRawPage, showFileAsText, showPage,
         exportPage, showHighlightedSource, preview) -- , applyPreCommitPlugins)
-import Network.Gitit.Page (readCategories)
+import Network.Gitit.Page (readCategories, stringToPage)
 import qualified Control.Exception as E
 import System.FilePath
 import Network.Gitit.State
@@ -85,6 +86,11 @@ import Data.Time.Clock (UTCTime(..))
 import Data.FileStore
 import System.Log.Logger (logM, Priority(..))
 import qualified Data.Aeson as J
+
+isValidPath :: String -> Bool
+isValidPath "index" = False
+isValidPath ('_':_) = False
+isValidPath _       = True
 
 handleAny :: Handler
 handleAny = withData $ \(params :: Params) -> uriRest $ \uri ->
@@ -272,7 +278,13 @@ goToPage = withData $ \(params :: Params) -> do
                                        Nothing -> searchResults
 
 searchResults :: Handler
-searchResults = withData $ \(params :: Params) -> do
+searchResults = searchResults' "Search results"
+
+notFoundPage :: Handler
+notFoundPage = searchResults' "Page Not Found"
+
+searchResults' :: String -> Handler
+searchResults' myTitle = withData $ \(params :: Params) -> do
   let patterns = pPatterns params `orIfNull` [pGotoPage params]
   fs <- getFileStore
   matchLines <- if null patterns
@@ -286,8 +298,8 @@ searchResults = withData $ \(params :: Params) -> do
                                        -- return 1 on no match, and filestore <=0.3.3
                                        -- doesn't handle this properly:
                                        (\(_ :: FileStoreError)  -> return [])
-  let contentMatches = filter ("Magnolia" `isPrefixOf`) $ map matchResourceName matchLines
-  allPages <- filter ("Magnolia" `isPrefixOf`) <$> liftIO (index fs) >>= filterM isPageFile
+  let contentMatches = filter isValidPath $ map matchResourceName matchLines
+  allPages <- filter isValidPath <$> liftIO (index fs) >>= filterM isPageFile
   let slashToSpace = map (\x -> if x == '/' then ' ' else x)
   let inPageName pageName' x = x `elem` (words $ slashToSpace $ dropExtension pageName')
   let matchesPatterns pageName' = not (null patterns) &&
@@ -332,7 +344,7 @@ searchResults = withData $ \(params :: Params) -> do
                   pgShowPageTools = False,
                   pgTabs = [],
                   pgScripts = ["search.js"],
-                  pgTitle = "Search results"}
+                  pgTitle = myTitle}
                 htmlMatches
 
 showPageHistory :: Handler
@@ -692,12 +704,24 @@ contentsPage = do
   case mbCached of
     Nothing -> do
       fs <- getFileStore
-      i <- filter (not . null) . map (drop 1 . dropWhile (/= '/')) . filter ("Magnolia" `isPrefixOf`) . map dropExtension . filter (".page" `isExtensionOf`) <$> (liftIO $ index fs)
-      let resp' = setContentType "application/json; charset=utf-8" (toResponse noHtml) {rsBody = BLU.fromString $ BLU.toString $ J.encode $ mkContents i}
+      i <- filter (not . null) . filter isValidPath . map dropExtension . filter (".page" `isExtensionOf`) <$> (liftIO $ index fs)
+      i' <- mapM (getTitles "") $ mkContents i
+      let resp' = setContentType "application/json; charset=utf-8" (toResponse noHtml) {rsBody = BLU.fromString $ BLU.toString $ J.encode $ i'}
       cacheContents "_contents" $ S.concat $ B.toChunks $ rsBody resp'
       ok resp'
     Just (_, contents) -> ok emptyResponse {rsBody = B.fromChunks [contents]}
   where
+    getTitles s ct = do
+      conf <- getConfig
+      fs <- getFileStore
+      let targetPage = s ++ t ct
+      let targetFile = targetPage ++ ".page"
+      revid <- liftIO $ latest fs targetFile
+      raw <- liftIO $ retrieve fs targetFile $ Just revid
+      let t' = pageTitle $ stringToPage conf (t ct) raw
+      c' <- mapM (getTitles (targetPage ++ "/")) (c ct)
+      return $ ContentTree t' c'
+
     mkContents :: [String] -> [ContentTree]
     mkContents (s:ss) = let (children, other) = partition ((s ++ "/") `isPrefixOf`) ss
                             children' = mkContents $ map (drop $ length s + 1) children

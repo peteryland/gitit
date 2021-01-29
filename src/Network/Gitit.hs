@@ -171,6 +171,7 @@ wikiHandlers =
 --   , dir "_activity" showActivity
 --   , dir "_go"       goToPage
   , method GET >> dir "_search"   searchResults
+  , method GET >> dir "_notfound"   notFoundPage
 --   , dir "_upload"   $  do guard =<< return . uploadsAllowed =<< getConfig
 --                           msum [ method GET  >> authenticate ForModify uploadForm
 --                                  , method POST >> authenticate ForModify uploadFile ]

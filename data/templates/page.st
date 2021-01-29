@@ -22,7 +22,7 @@
     <!--[if IE]><link href="$base$/css/ie.css" rel="stylesheet" media="screen, projection" type="text/css" /><![endif]-->
     <script>
       var sidebarmoved = 0;
-      var oldsidebarwidth = 0;
+      var oldsidebarwidth = "0";
       var sidebar;
       var sidebarmain;
       var pagetitle;
@@ -31,31 +31,21 @@
       function onscrollhandler() {
         if (!content) content = document.getElementById("tl-content");
         if (!pagetitle) pagetitle = document.querySelector(".tl-pagetitle");
-        var fs = (document.documentElement.clientWidth <= 1000? 175 : 300) - content.scrollTop;
-        if (fs < 25) {
-          pagetitle.style.cssText = "display: none;";
-          if (!sidebar) sidebar = document.getElementById("tl-sidebar");
-          if (sidebar.style.width === '') {
-            oldsidebarwidth = '';
-            sidebar.style.minWidth = 0;
-            if (!sidebarmain) sidebarmain = document.getElementById("tl-sidebar-main");
-            sidebarmain.style.transform = 'rotateY(90deg)';
-            sidebar.style.width = 0;
-          }
-        } else {
-          pagetitle.style.cssText = "font-size: " + fs + "%;";
+        if (content.scrollTop > 50) {
+          pagetitle.style.transform = 'rotateX(90deg)';
+          pagetitle.style.lineHeight = "0%";
+          pagetitle.style.margin = 0;
         }
       }
 
       function onloadhandler() {
         var here = "$pagename$".split(' ').join('+');
-        if (!here.startsWith("Magnolia")) // top-level page like /_search
-          here = "Magnolia+6.1+documentation"
-        var top = "/" + here.split('/')[0];
+        if (here.startsWith("_")) // top-level page like /_search
+          here = ""
         var tlcontents = document.getElementById("tl-contents");
         fetch("/_contents", {cache: "force-cache"})
           .then(r => r.json())
-          .then(contents => mkul(tlcontents, "/" + here, contents, top));
+          .then(contents => mkul(tlcontents, "/" + here, contents, ""));
       }
 
       document.addEventListener("DOMContentLoaded", onloadhandler);
@@ -66,7 +56,7 @@
         sidebarmoved = 0;
         if (!sidebar) sidebar = document.getElementById("tl-sidebar");
         if (!sidebarmain) sidebarmain = document.getElementById("tl-sidebar-main");
-        // sidebar.style.transition = '';
+        sidebar.style.transition = '';
       }
       function doresize(e) {
         sidebar.style.width = (e.clientX - sidebar.offsetLeft) + 'px';
@@ -74,18 +64,18 @@
         sidebarmoved = 1;
       }
       function stopresize(e) {
-        // sidebar.style.transition = 'width 0.2s';
+        sidebar.style.transition = 'width 0.2s';
         if (sidebarmoved === 0) {
           if (sidebar.clientWidth > 20) {
             oldsidebarwidth = sidebar.style.width;
             sidebar.style.minWidth = 0;
             sidebarmain.style.transform = 'rotateY(90deg)';
-            sidebar.style.width = 0;
+            sidebar.style.width = "0";
           } else {
             sidebar.style.minWidth = '';
             sidebarmain.style.transform = '';
-            sidebar.style.width = oldsidebarwidth < 20? "30em" : oldsidebarwidth;
-            oldsidebarwidth = 0;
+            sidebar.style.width = oldsidebarwidth;
+            oldsidebarwidth = "0";
           }
         }
         window.removeEventListener('mousemove', doresize);
@@ -93,7 +83,7 @@
       }
 
       function mkul(parent, here, items, linkname) {
-        if (items.length == 0) return;
+        if (items.length === 0) return;
         var ul = document.createElement("ul");
         for(var i = 0; i < items.length; i++) {
           var item = items[i];
@@ -119,7 +109,7 @@
       }
     </script>
   </head>
-  <body onresize="onscrollhandler()">
+  <body>
     <div id="tl-header">
       <p class="tl-crumbs">$crumblinks$</p>
       <h1 class="tl-pagetitle">$pagetitle$</h1>
@@ -131,7 +121,7 @@
             <input type="text" name="q" id="tl-q" placeholder="Search"/>
           </form>
           <ul>
-            <li id="tl-contents" class="nav-parent nav-open"><div></div><a href="/Magnolia+6.1+documentation">Magnolia 6.1 documentation</a></li>
+            <li id="tl-contents" class="nav-parent nav-open"><div></div><a href="/">Magnolia documentation</a></li>
           </ul>
           <!-- ul style="margin: 0; padding: 0; list-style: none;">
             <li style="list-style: none"><a href="/_index" style="color: #CCC;">All Pages</a></li>

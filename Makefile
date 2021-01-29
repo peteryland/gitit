@@ -21,6 +21,8 @@ tmp-inst-ghc/usr/bin/gitit:
 	cp data/static/img/icons/{page,feed,folder}.png tmp-inst-ghc/usr/share/gitit/data/static/img/icons/
 	cp data/static/img/icons/mgnl*.png tmp-inst-ghc/usr/share/gitit/data/static/img/icons/
 	cp data/static/fonts/MagnoliaIcons.woff tmp-inst-ghc/usr/share/gitit/data/static/fonts
+	mkdir -p tmp-inst-ghc/var/www
+	cp -r debian/errors tmp-inst-ghc/var/www/
 	cp debian/gitit.site.conf tmp-inst-ghc/etc/apache2/sites-available/mgnldoc.conf
 
 install:

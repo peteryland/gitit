@@ -1,9 +1,9 @@
-gitit (0.13.0.0+mgnl-9) unstable; urgency=medium
+gitit (0.13.0.0+mgnl-22) unstable; urgency=medium
 
   * New upstream.
   * Custom changes for use at Magnolia.
 
- -- Pete Ryland <pete.ryland@magnolia-cms.com>  Mon, 11 May 2020 15:18:26 +0200
+ -- Pete Ryland <pete.ryland@magnolia-cms.com>  Tue, 01 Sep 2020 16:50:26 +0200
 
 gitit (0.12.3.1+dfsg-1) unstable; urgency=medium
 

@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="robots" content="NOINDEX, NOFOLLOW"/>
+    <link rel="stylesheet" type="text/css" href="/errors/default.css" media="screen, projection"/>
+    <title>Magnolia Site Down</title>
+</head>
+
+<body>
+
+<div id="wrapper">
+    <div id="branding">
+        <div id="logo">
+            <a href="http://www.magnolia-cms.com" title="Homepage">
+                <img src="/errors/images/magnolia-logo-print.png" alt="Magnolia"/>
+                <strong>Magnolia</strong>
+                <span></span>
+            </a>
+        </div>
+    </div>
+
+    <div id="wrapper-2">
+        <div id="wrapper-3">
+            <div id="main">
+                <div class="text">
+                    <div class="text-meta">
+                        <ul class="text-data">
+                            <li class="date"><!--#echo var="DATE_LOCAL"--></li>
+                            <li class="author"></li>
+                        </ul>
+
+                    </div>
+
+                    <div class="text-box misc">
+                        <h2><!--#echo var="HTTP_HOST"--> appears to be down.</h2>
+
+                            <p>Somehow you're seeing this page and you
+                               shouldn't. Someone's probably messing around
+                               with the server.  If this persists, please
+                               contact <!--#echo var="SERVER_ADMIN" -->.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="site-info">
+        <div>
+            <p id="copyright">&#169; <!--#config timefmt="%Y" --><!--#echo var="DATE_LOCAL" --> Magnolia International Ltd.</p>
+
+            <p id="copyright-magnolia"><span>Powered by</span>
+                <a href="http://www.magnolia-cms.com"><strong>Magnolia CMS</strong></a>
+            </p>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+builddir: dist-ghc
+flags: +plugins
+
+package *
+  ghc-options: -optl-Wl,-z,relro,-O2
+
+program-options
+  ghc-options: -optl-Wl,-z,relro,-O2
